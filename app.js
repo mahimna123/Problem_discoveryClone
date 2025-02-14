@@ -16,7 +16,7 @@ const ejsMate = require('ejs-mate');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 
-const ExpressError = require ('./utils/expressError');
+const ExpressError = require ('./utils/ExpressError');
 const methodOverride = require('method-override');
 
 
