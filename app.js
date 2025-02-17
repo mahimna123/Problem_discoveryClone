@@ -16,9 +16,8 @@ const ejsMate = require('ejs-mate');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 
-const ExpressError = require ('./utils/expressError');
+const ExpressError = require ('./utils/ExpressError');
 const methodOverride = require('method-override');
-
 
 
 
@@ -26,8 +25,7 @@ const userRoutes =require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 const MongoDBStore = require("connect-mongo")(session);
-//const dbUrl = process.env.DB_URL;
-const dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp';
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
 mongoose.connect(dbUrl, {
 });
 
@@ -164,9 +162,12 @@ app.use((err, req, res, next)=>{
   res.status(statusCode).render('error', { err })
 })
 
-app.listen(3000, () =>{
-    console.log('Serving on port 3000')
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Serving on port ${port}`)
 })
+
 
 app.delete('/campgrounds/:id', async (req, res) => {
   const { id } = req.params;
