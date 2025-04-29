@@ -11,6 +11,8 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const path = require ('path');
+const { Idea, Frame } = require('./models/schemas');
+const Brainstorm = require('./models/brainstorm');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -24,8 +26,9 @@ const methodOverride = require('method-override');
 const userRoutes =require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+const ideationRouter = require('./routes/ideation');
 const MongoDBStore = require("connect-mongo")(session);
-const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
+const dbUrl = 'mongodb://127.0.0.1:27017/yelp-camp';
 mongoose.connect(dbUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -107,26 +110,39 @@ const connectSrcUrls = [
   "https://api.maptiler.com/", // add this
 ];
 const fontSrcUrls = [];
+// app.use(
+//   helmet.contentSecurityPolicy({
+//       directives: {
+//           defaultSrc: [],
+//           connectSrc: ["'self'", ...connectSrcUrls],
+//           scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+//           styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+//           workerSrc: ["'self'", "blob:"],
+//           objectSrc: [],
+//           imgSrc: [
+//               "'self'",
+//               "blob:",
+//               "data:",
+//               "https://res.cloudinary.com/dahphkomw/",
+//               "https://res.cloudinary.com/douqbebwk/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+//               "https://images.unsplash.com/",
+//               "https://api.maptiler.com/",
+//           ],
+//           fontSrc: ["'self'", ...fontSrcUrls],
+//       },
+//   })
+// );
+
+
 app.use(
   helmet.contentSecurityPolicy({
-      directives: {
-          defaultSrc: [],
-          connectSrc: ["'self'", ...connectSrcUrls],
-          scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
-          styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
-          workerSrc: ["'self'", "blob:"],
-          objectSrc: [],
-          imgSrc: [
-              "'self'",
-              "blob:",
-              "data:",
-              "https://res.cloudinary.com/dahphkomw/",
-              "https://res.cloudinary.com/douqbebwk/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
-              "https://images.unsplash.com/",
-              "https://api.maptiler.com/",
-          ],
-          fontSrc: ["'self'", ...fontSrcUrls],
-      },
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "blob:", "data:"],
+      "script-src-attr": ["'self'", "'unsafe-inline'"],
+    },
   })
 );
 
@@ -152,6 +168,7 @@ app.use((req, res, next) => {
 app.use('/', userRoutes);
 app.use('/campgrounds', campgroundRoutes)
 app.use('/campgrounds/:id/reviews', reviewRoutes)
+app.use('/', ideationRouter);
 
 app.get('/', (req, res)=>{
   res.render('home')

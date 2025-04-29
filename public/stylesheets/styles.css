@@ -1,0 +1,164 @@
+/* public/stylesheets/styles.css */
+.idea {
+    position: absolute;
+    background-color: yellow;
+    width: 200px;
+    height: 100px;
+    border: 1px solid black;
+    padding: 10px;
+  }
+  
+  .frame-box {
+    position: absolute;
+    background-color: lightblue;
+    width: 300px;
+    height: 200px;
+    border: 1px solid black;
+    padding: 10px;
+  }
+  
+  .line {
+    position: absolute;
+    height: 2px;
+    background: black;
+    transform-origin: 0 0;
+  }
+  
+  .define-frame-button {
+    position: absolute;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 70%;
+    resize: none;
+    border: none;
+    background: transparent;
+  }
+  
+  button {
+    margin-top: 5px;
+    padding: 5px;
+    cursor: pointer;
+  }
+.body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #e0e0e0;
+}
+.problem-statement {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    resize: both;
+    overflow: auto;
+    z-index: 10;
+}
+.problem-statement h2 {
+    margin: 0;
+    color: #333;
+}
+.problem-statement textarea {
+    width: 100%;
+    height: 80px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: none;
+}
+.add-idea-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000;
+}
+.add-idea-button:hover {
+    background-color: #218838;
+}
+.idea, .frame-box {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    padding: 10px;
+    background-color: #ffeb3b;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    resize: both;
+    overflow: auto;
+    z-index: 10;
+}
+.frame-box {
+    background-color: #a5d6a7; /* Different color for frame boxes */
+}
+.idea:active, .frame-box:active {
+    cursor: grabbing;
+}
+.idea textarea, .frame-box textarea {
+    width: 100%;
+    height: calc(100% - 30px);
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    resize: none;
+}
+.delete-button, .add-more-ideas-button {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.delete-button {
+    background-color: #ff4444;
+}
+.points {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    font-size: 18px;
+    color: #333;
+    z-index: 1000;
+}
+.line {
+    position: absolute;
+    background-color: #333;
+    height: 2px;
+    transform-origin: 0 0;
+    z-index: 5; /* Ensure lines are above the background but below elements */
+}
+.define-frame-button {
+    position: absolute;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 10;
+}
