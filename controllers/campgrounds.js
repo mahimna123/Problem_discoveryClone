@@ -33,13 +33,26 @@ module.exports.renderNewForm = (req, res) => {
       populate: {
         path: 'author'
       }
-    }).populate('author');
-    console.log(campground);
+    }).populate('author')
+    .populate('solution');
+    
     if(!campground){
         req.flash('error', 'Cannot find that campground');
-       return res.redirect('/campgrounds')
+        return res.redirect('/campgrounds')
     }
-    res.render('campgrounds/show', { campground });
+
+    // Create a simplified version of the campground for the map
+    const mapData = {
+        _id: campground._id,
+        title: campground.title,
+        location: campground.location,
+        geometry: {
+            type: 'Point',
+            coordinates: campground.geometry.coordinates
+        }
+    };
+
+    res.render('campgrounds/show', { campground, mapData });
   }
 
   module.exports.renderEditForm = async(req, res) => {

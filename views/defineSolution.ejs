@@ -1,0 +1,155 @@
+<% layout('layouts/boilerplate')%>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Define Your Solution in Detail</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form id="solutionForm">
+                        <div class="mb-3">
+                            <label for="solutionTitle" class="form-label">Solution Title</label>
+                            <input type="text" class="form-control" id="solutionTitle" placeholder="Enter a title for your solution">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="solutionShouldDo" class="form-label">What the Solution Should Do</label>
+                            <textarea class="form-control" id="solutionShouldDo" rows="4" 
+                                placeholder="List the key functionalities and behaviors your solution should have"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="solutionShouldNotDo" class="form-label">What the Solution Should Never Do</label>
+                            <textarea class="form-control" id="solutionShouldNotDo" rows="4" 
+                                placeholder="List the behaviors and functionalities your solution should avoid"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Key Features Table</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="keyFeaturesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Key Feature</th>
+                                            <th>Format</th>
+                                            <th>Usage</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><input type="text" class="form-control" name="feature[]" placeholder="Feature name"></td>
+                                            <td><input type="text" class="form-control" name="format[]" placeholder="Data format"></td>
+                                            <td><input type="text" class="form-control" name="usage[]" placeholder="How it's used"></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="addRow()">Add Feature</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="implementationSteps" class="form-label">Implementation Steps</label>
+                            <textarea class="form-control" id="implementationSteps" rows="5" 
+                                placeholder="Outline the steps to implement your solution"></textarea>
+                        </div>
+
+                        <input type="hidden" id="campgroundId" value="<%= campgroundId %>">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/campgrounds/<%= campgroundId %>" class="btn btn-secondary me-2">
+                                <i class="fas fa-arrow-left"></i> Back to Problem Statement
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Solution
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addRow() {
+    const tbody = document.querySelector('#keyFeaturesTable tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td><input type="text" class="form-control" name="feature[]" placeholder="Feature name"></td>
+        <td><input type="text" class="form-control" name="format[]" placeholder="Data format"></td>
+        <td><input type="text" class="form-control" name="usage[]" placeholder="How it's used"></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button></td>
+    `;
+    tbody.appendChild(newRow);
+}
+
+function removeRow(button) {
+    const tbody = document.querySelector('#keyFeaturesTable tbody');
+    if (tbody.children.length > 1) {
+        button.closest('tr').remove();
+    }
+}
+
+function getKeyFeaturesTableData() {
+    const rows = document.querySelectorAll('#keyFeaturesTable tbody tr');
+    const features = [];
+    rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs[0].value.trim() !== '') {
+            features.push({
+                feature: inputs[0].value,
+                format: inputs[1].value,
+                usage: inputs[2].value
+            });
+        }
+    });
+    return features;
+}
+
+document.getElementById('solutionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const keyFeatures = getKeyFeaturesTableData();
+    
+    const solutionData = {
+        title: document.getElementById('solutionTitle').value,
+        shouldDo: document.getElementById('solutionShouldDo').value,
+        shouldNotDo: document.getElementById('solutionShouldNotDo').value,
+        keyFeatures: keyFeatures,
+        implementationSteps: document.getElementById('implementationSteps').value,
+        campgroundId: document.getElementById('campgroundId').value
+    };
+
+    console.log('Form submission data:', solutionData); // Debug log
+
+    try {
+        const response = await fetch('/api/deepseek', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(solutionData)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Response data:', data); // Debug log
+            alert('Technical specifications generated successfully!');
+            
+            // Debug the URL parameters
+            const redirectUrl = `/solution-details?title=${encodeURIComponent(data.title)}&detail=${encodeURIComponent(data.detail)}&shouldDo=${encodeURIComponent(data.shouldDo)}&shouldNotDo=${encodeURIComponent(data.shouldNotDo)}&keyFeatures=${encodeURIComponent(JSON.stringify(data.keyFeatures))}&implementationSteps=${encodeURIComponent(data.implementationSteps)}&campgroundId=${encodeURIComponent(solutionData.campgroundId)}`;
+            console.log('Redirect URL:', redirectUrl); // Debug log
+            
+            window.location.href = redirectUrl;
+        } else {
+            alert('Failed to generate technical specifications. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while generating technical specifications.');
+    }
+});
+</script> 

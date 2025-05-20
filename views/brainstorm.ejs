@@ -1,4 +1,3 @@
-<!-- views/brainstorm.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,14 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Brainstorming Board</title>
   <link rel="stylesheet" href="/stylesheets/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="problem-statement" id="problem-statement">
-    <h2>Problem Statement</h2>
-    <textarea placeholder="Enter the problem statement here..."></textarea>
-  </div>
-  <div class="points">Total Points: <span id="points">0</span></div>
-  <button class="add-idea-button">Add Idea</button>
-  <script src="/javascripts/controller.js"></script>
+  <%- include('partials/navbar') %>
+  <% if (currentUser) { %>
+    <div class="container mt-4">
+      <div class="row mb-4">
+        <div class="col">
+          <h1>Welcome, <%= currentUser.username %>!</h1>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col">
+          <div class="problem-statement" id="problem-statement">
+            <h2>Problem Statement</h2>
+            <textarea placeholder="Enter the problem statement here..." readonly><%= (problemStatement && problemStatement.content) || (problem && problem.description) || '' %></textarea>
+            <% if (problem) { %>
+              <input type="hidden" id="problem-id" value="<%= problem._id %>">
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="points">Total Points: <span id="points">0</span></div>
+
+      <!-- Success Message -->
+      <div class="alert alert-success alert-dismissible fade" role="alert" id="saveSuccess" style="display: none;">
+        <i class="fas fa-check-circle me-2"></i>
+        <span id="saveMessage">Your ideas have been saved successfully!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-danger alert-dismissible fade" role="alert" id="saveError" style="display: none;">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span id="errorMessage">Failed to save your ideas. Please try again.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+
+    <!-- Fixed button container at bottom -->
+    <div class="button-container">
+      <a href="/campgrounds/<%= problem ? problem._id : '' %>" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Problem Statement
+      </a>
+      <button class="btn btn-primary add-idea-button">Add Idea</button>
+      <a href="/ideation/my-brainstorms" class="btn btn-info text-white">View My Brainstorms</a>
+      <button class="btn btn-success save-button">Save</button>
+    </div>
+
+    <script src="/javascripts/controller.js"></script>
+    <script src="/javascripts/save.js"></script>
+    <script>
+      function showSaveSuccess(message) {
+        const successAlert = document.getElementById('saveSuccess');
+        const messageElement = document.getElementById('saveMessage');
+        messageElement.textContent = message || 'Your ideas have been saved successfully!';
+        successAlert.style.display = 'block';
+        successAlert.classList.add('show');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          successAlert.classList.remove('show');
+          setTimeout(() => {
+            successAlert.style.display = 'none';
+          }, 150);
+        }, 5000);
+      }
+
+      function showSaveError(message) {
+        const errorAlert = document.getElementById('saveError');
+        const messageElement = document.getElementById('errorMessage');
+        messageElement.textContent = message || 'Failed to save your ideas. Please try again.';
+        errorAlert.style.display = 'block';
+        errorAlert.classList.add('show');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          errorAlert.classList.remove('show');
+          setTimeout(() => {
+            errorAlert.style.display = 'none';
+          }, 150);
+        }, 5000);
+      }
+    </script>
+  <% } else { %>
+    <div class="container mt-4">
+      <div class="alert alert-warning">
+        <h1>Please Log In</h1>
+        <p>You must be logged in to use the ideation tool. <a href="/login" class="alert-link">Log in here</a>.</p>
+      </div>
+    </div>
+  <% } %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
