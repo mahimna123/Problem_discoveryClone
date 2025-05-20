@@ -1,0 +1,187 @@
+<% layout('layouts/boilerplate')%>
+
+<div class="container mt-3">
+    <h1 class="mb-4">Your Brainstorms, <%= currentUser.username %></h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Problem Statements</h2>
+                </div>
+                <div class="card-body">
+                    <% if (problemStatements.length > 0) { %>
+                        <ul class="list-group list-group-flush">
+                            <% problemStatements.forEach((statement, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-primary me-2"><%= index + 1 %></span>
+                                        <%= statement.content %>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm delete-problem-statement" data-id="<%= statement._id %>">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-muted mb-0">No problem statements yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Ideas</h2>
+                </div>
+                <div class="card-body">
+                    <% if (ideas.length > 0) { %>
+                        <ul class="list-group list-group-flush">
+                            <% ideas.filter(idea => idea.content && idea.content.trim() !== '').forEach((idea, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-success me-2"><%= index %></span>
+                                        <%= idea.content %>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm delete-idea" data-id="<%= idea._id %>">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-muted mb-0">No ideas yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Frames</h2>
+                </div>
+                <div class="card-body">
+                    <% if (frames.length > 0) { %>
+                        <ul class="list-group list-group-flush">
+                            <% frames.filter(frame => frame.content && frame.content.trim() !== '').forEach((frame, index) => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-info me-2"><%= index %></span>
+                                        <%= frame.content %>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm delete-frame" data-id="<%= frame._id %>">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-muted mb-0">No frames yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <a href="/campgrounds" class="btn btn-secondary me-2">
+            <i class="fas fa-arrow-left"></i> View All Problem Statements
+        </a>
+        <% if (problemStatements.length > 0 && problemStatements[0].problemId) { %>
+            <a href="/ideation/<%= problemStatements[0].problemId._id %>" class="btn btn-primary me-2">
+                <i class="fas fa-lightbulb"></i> Back to Ideation Tool
+            </a>
+        <% } else { %>
+            <a href="/ideation" class="btn btn-primary me-2">
+                <i class="fas fa-lightbulb"></i> Back to Ideation Tool
+            </a>
+        <% } %>
+        <a href="/define-solution" class="btn btn-success">
+            <i class="fas fa-check-circle"></i> Define the Solution
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Delete idea
+    document.querySelectorAll('.delete-idea').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete this idea?')) {
+                const id = this.dataset.id;
+                try {
+                    const response = await fetch(`/api/ideas/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete idea');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to delete idea');
+                }
+            }
+        });
+    });
+
+    // Delete frame
+    document.querySelectorAll('.delete-frame').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete this frame?')) {
+                const id = this.dataset.id;
+                try {
+                    const response = await fetch(`/api/frames/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete frame');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to delete frame');
+                }
+            }
+        });
+    });
+
+    // Delete problem statement
+    document.querySelectorAll('.delete-problem-statement').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (confirm('Are you sure you want to delete this problem statement?')) {
+                const id = this.dataset.id;
+                try {
+                    const response = await fetch(`/api/problem-statements/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete problem statement');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to delete problem statement');
+                }
+            }
+        });
+    });
+});
+</script>

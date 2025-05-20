@@ -1,12 +1,11 @@
 <% layout('layouts/boilerplate')%>
 <link rel="stylesheet" href="/stylesheets/stars.css">
-
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
 <div class="row">
     <div class="col-6">
-  
-        <div id="map"></div>
-            <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div id="map" style="width: 100%; height: 400px; margin-bottom: 20px; border: 1px solid #ccc; position: relative;"></div>
+        <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 <% campground.images.forEach((img, i) => {  %>
                 <div class="carousel-item <%= i === 0 ? 'active' : ''%>">
@@ -30,11 +29,44 @@
             <div class="card-body">
                 <h5 class="card-title"><%= campground.title%></h5>
                 <p class="card-text"><%= campground.description%></p>
+                <div class="d-flex gap-2 mb-3">
+                    <a href="/ideation/<%= campground._id %>" class="btn btn-primary">
+                        <i class="fas fa-lightbulb"></i> Start Ideation
+                    </a>
+                    <a href="/ideation/my-brainstorms" class="btn btn-info">
+                        <i class="fas fa-brain"></i> My Brainstorms
+                    </a>
+                    <a href="/define-solution?campgroundId=<%= campground._id %>" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Define the Solution
+                    </a>
+                    <% if (campground.solution) { %>
+                    <a href="/solution-details?title=<%= encodeURIComponent(campground.solution.title) %>&detail=<%= encodeURIComponent(campground.solution.detail) %>&keyFeatures=<%= encodeURIComponent(campground.solution.keyFeatures) %>&implementationSteps=<%= encodeURIComponent(campground.solution.implementationSteps) %>" class="btn btn-info ms-2">
+                        <i class="fas fa-eye"></i> View Solution
+                    </a>
+                    <% } %>
+                </div>
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-muted"><%= campground.location%></li>
                 <li class="list-group-item">Submitted by <%= campground.author.username%></li>
             </ul>
+            <% if (campground.solution) { %>
+            <div class="card-body">
+                <a class="btn btn-success" data-bs-toggle="collapse" href="#solutionDetailsCollapse" role="button" aria-expanded="false" aria-controls="solutionDetailsCollapse">
+                    <i class="fas fa-cogs"></i> Solution Details
+                </a>
+                <div class="collapse mt-3" id="solutionDetailsCollapse">
+                    <h5>Title</h5>
+                    <p><%= campground.solution.title %></p>
+                    <h5>Technical Specifications</h5>
+                    <pre><%= campground.solution.detail %></pre>
+                    <h5>Key Features</h5>
+                    <pre><%= campground.solution.keyFeatures %></pre>
+                    <h5>Implementation Steps</h5>
+                    <pre><%= campground.solution.implementationSteps %></pre>
+                </div>
+            </div>
+            <% } %>
             <%  if( currentUser && campground.author.equals(currentUser._id))  {%>
             <div class="card-body">
                 <a class="card-link btn btn-info" href="/campgrounds/<%=campground._id%>/edit">Edit</a>
@@ -53,10 +85,6 @@
         <% if(currentUser){ %>
         <h2>Leave a Review</h2>
         <form action="/campgrounds/<%=campground._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
-            <!-- <div class="mb-3">
-                <label class="form-label" for="rating">Rating</label>
-                <input class="form-range" type="range" min="1" max="5" name="review[rating]" id="rating">
-            </div> -->
             <fieldset class="starability-basic">
                 <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
                     aria-label="No rating." />
@@ -88,7 +116,6 @@
                 <p class="starability-result" data-rating="<%=review.rating%>">
                     Rated: <%= review.rating %> stars
                 </p>
-                <!-- <h6 class="card-subtitle mb-2 text-muted">By <%= review.author.username%></h6> -->
                 <p class="card-text">Review: <%= review.body %></p>
                 <%  if( currentUser && review.author.equals(currentUser._id))  {%>
                 <form action="/campgrounds/<%=campground._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
@@ -102,9 +129,9 @@
 </div>
 </body>
 
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script>
-    const maptilerApiKey = '4btAbygczgbYb0GwBLJm';
-     const campground = <%- JSON.stringify(campground) %>
- </script>    
- 
+    window.maptilerApiKey = '4btAbygczgbYb0GwBLJm';
+    window.campground = <%- JSON.stringify(mapData) %>;
+</script>
 <script src="/javascripts/showPageMap.js"></script>

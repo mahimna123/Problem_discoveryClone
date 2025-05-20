@@ -1,51 +1,70 @@
-maptilersdk.config.apiKey = maptilerApiKey;
+console.log('Cluster map initialization started');
 
-const map = new maptilersdk.Map({
+// Create a GeoJSON source from campgrounds
+const geojson = {
+    type: 'FeatureCollection',
+    features: campgrounds.map(campground => ({
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: campground.geometry.coordinates
+        },
+        properties: {
+            title: campground.title,
+            location: campground.location,
+            id: campground._id
+        }
+    }))
+};
+
+// Initialize the map
+const clusterMap = new maplibregl.Map({
     container: 'cluster-map',
-    style: maptilersdk.MapStyle.BRIGHT,
-    center: [-103.59179687498357, 40.66995747013945],
-    zoom: 3
+    style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${maptilerApiKey}`,
+    center: [78.9629, 20.5937],
+    zoom: 4
 });
 
-map.on('load', function () {
-    map.addSource('campgrounds', {
+// Add navigation controls
+clusterMap.addControl(new maplibregl.NavigationControl());
+
+// Add the source and layers when the map loads
+clusterMap.on('load', () => {
+    // Add the source
+    clusterMap.addSource('campgrounds', {
         type: 'geojson',
-        data: campgrounds,
+        data: geojson,
         cluster: true,
-        clusterMaxZoom: 14, // Max zoom to cluster points on
-        clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+        clusterMaxZoom: 14,
+        clusterRadius: 50
     });
 
-    map.addLayer({
+    // Add the cluster layer
+    clusterMap.addLayer({
         id: 'clusters',
         type: 'circle',
         source: 'campgrounds',
         filter: ['has', 'point_count'],
         paint: {
-            // Use step expressions (https://docs.maptiler.com/gl-style-specification/expressions/#step)
-            // with three steps to implement three types of circles:
             'circle-color': [
                 'step',
                 ['get', 'point_count'],
-                '#00BCD4',
-                10,
-                '#2196F3',
-                30,
-                '#3F51B5'
+                '#51bbd6',
+                10, '#f1f075',
+                30, '#f28cb1'
             ],
             'circle-radius': [
                 'step',
                 ['get', 'point_count'],
-                15,
-                10,
                 20,
-                30,
-                25
+                10, 30,
+                30, 40
             ]
         }
     });
 
-    map.addLayer({
+    // Add the cluster count layer
+    clusterMap.addLayer({
         id: 'cluster-count',
         type: 'symbol',
         source: 'campgrounds',
@@ -57,59 +76,55 @@ map.on('load', function () {
         }
     });
 
-    map.addLayer({
+    // Add the unclustered point layer
+    clusterMap.addLayer({
         id: 'unclustered-point',
         type: 'circle',
         source: 'campgrounds',
         filter: ['!', ['has', 'point_count']],
         paint: {
             'circle-color': '#11b4da',
-            'circle-radius': 4,
+            'circle-radius': 8,
             'circle-stroke-width': 1,
             'circle-stroke-color': '#fff'
         }
     });
 
-    // inspect a cluster on click
-    map.on('click', 'clusters', async (e) => {
-        const features = map.queryRenderedFeatures(e.point, {
+    // Add click handlers for clusters
+    clusterMap.on('click', 'clusters', (e) => {
+        const features = clusterMap.queryRenderedFeatures(e.point, {
             layers: ['clusters']
         });
         const clusterId = features[0].properties.cluster_id;
-        const zoom = await map.getSource('campgrounds').getClusterExpansionZoom(clusterId);
-        map.easeTo({
-            center: features[0].geometry.coordinates,
-            zoom
-        });
+        clusterMap.getSource('campgrounds').getClusterExpansionZoom(
+            clusterId,
+            (err, zoom) => {
+                if (err) return;
+
+                clusterMap.easeTo({
+                    center: features[0].geometry.coordinates,
+                    zoom: zoom
+                });
+            }
+        );
     });
 
-    // When a click event occurs on a feature in
-    // the unclustered-point layer, open a popup at
-    // the location of the feature, with
-    // description HTML from its properties.
-    map.on('click', 'unclustered-point', function (e) {
-        const text = e.features[0].properties.popUpMarkup;
+    // Add click handlers for individual points
+    clusterMap.on('click', 'unclustered-point', (e) => {
         const coordinates = e.features[0].geometry.coordinates.slice();
+        const { title, location } = e.features[0].properties;
 
-        // Ensure that if the map is zoomed out such that
-        // multiple copies of the feature are visible, the
-        // popup appears over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        new maptilersdk.Popup()
+        new maplibregl.Popup()
             .setLngLat(coordinates)
-            .setHTML(
-            text
-        )
-            .addTo(map);
+            .setHTML(`<h3>${title}</h3><p>${location}</p>`)
+            .addTo(clusterMap);
     });
 
-    map.on('mouseenter', 'clusters', () => {
-        map.getCanvas().style.cursor = 'pointer';
+    // Change the cursor to a pointer when the mouse is over the clusters
+    clusterMap.on('mouseenter', 'clusters', () => {
+        clusterMap.getCanvas().style.cursor = 'pointer';
     });
-    map.on('mouseleave', 'clusters', () => {
-        map.getCanvas().style.cursor = '';
+    clusterMap.on('mouseleave', 'clusters', () => {
+        clusterMap.getCanvas().style.cursor = '';
     });
 });

@@ -34,6 +34,14 @@ const campgroundSchema = new Schema ({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    ideationSession: {
+        type: Schema.Types.ObjectId,
+        ref: 'ProblemStatement'
+    },
+    solution: {
+        type: Schema.Types.ObjectId,
+        ref: 'Solution'
+    },
     reviews: [
         {
             type: Schema.Types.ObjectId,

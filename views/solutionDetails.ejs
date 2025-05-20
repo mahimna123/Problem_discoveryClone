@@ -1,0 +1,99 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Solution Details</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><%= title %></h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h3 class="h5">Required Behaviors</h3>
+                        <div class="p-3 bg-light rounded">
+                            <% if (shouldDo) { %>
+                                <%- shouldDo.split('\n').map(line => `<p class="mb-1">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1">No required behaviors specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Prohibited Behaviors</h3>
+                        <div class="p-3 bg-light rounded">
+                            <% if (shouldNotDo) { %>
+                                <%- shouldNotDo.split('\n').map(line => `<p class="mb-1">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1">No prohibited behaviors specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Key Features</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Format</th>
+                                        <th>Usage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (keyFeatures) { %>
+                                        <% JSON.parse(keyFeatures).forEach(feature => { %>
+                                            <tr>
+                                                <td><%= feature.feature %></td>
+                                                <td><%= feature.format %></td>
+                                                <td><%= feature.usage %></td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="3" class="text-center">No key features specified.</td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Implementation Steps</h3>
+                        <div class="p-3 bg-light rounded">
+                            <% if (implementationSteps) { %>
+                                <%- implementationSteps.split('\n').map(line => `<p class="mb-1">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1">No implementation steps specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Technical Specifications</h3>
+                        <div class="p-3 bg-light rounded">
+                            <% if (detail) { %>
+                                <%- detail.split('\n').map(line => `<p class="mb-1">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1">No technical specifications available.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/campgrounds/<%= campgroundId %>" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Problem Statement
+                </a>
+                <a href="/ideation/define-solution?campgroundId=<%= campgroundId %>" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Solution
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

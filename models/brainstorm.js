@@ -1,40 +1,130 @@
-// models/brainstorm.js
-const { Idea, Frame } = require('./schemas');
+const { Idea, Frame, ProblemStatement, Connection } = require('./schemas');
 
 class Brainstorm {
-  constructor() {
-    this.totalPoints = 0;
-  }
-
-  async addIdea(content, x, y) {
-    const idea = new Idea({ content, x, y });
+  async addIdea(content, x, y, user) {
+    const idea = new Idea({
+      content,
+      x,
+      y,
+      user: user._id,
+      username: user.username,
+    });
     await idea.save();
-    this.totalPoints++;
-    return idea._id;
+    return idea;
   }
 
-  async getIdeas() {
-    return await Idea.find();
+  async getIdeas(userId) {
+    try {
+      return await Idea.find({ user: userId });
+    } catch (error) {
+      console.error('Error getting ideas:', error);
+      throw new Error('Failed to retrieve ideas');
+    }
   }
 
-  async removeIdea(ideaId) {
-    const result = await Idea.deleteOne({ _id: ideaId });
-    if (result.deletedCount > 0) this.totalPoints--;
+  async deleteIdea(ideaId, userId) {
+    const result = await Idea.deleteOne({ _id: ideaId, user: userId });
+    if (result.deletedCount === 0) {
+      throw new Error('Idea not found or not authorized');
+    }
   }
 
-  async addFrame(content, x, y) {
-    const frame = new Frame({ content, x, y });
+  async addFrame(content, x, y, user) {
+    const frame = new Frame({
+      content,
+      x,
+      y,
+      user: user._id,
+      username: user.username,
+    });
     await frame.save();
-    return frame._id;
+    return frame;
   }
 
-  async getFrames() {
-    return await Frame.find();
+  async getFrames(userId) {
+    try {
+      return await Frame.find({ user: userId });
+    } catch (error) {
+      console.error('Error getting frames:', error);
+      throw new Error('Failed to retrieve frames');
+    }
   }
 
-  async removeFrame(frameId) {
-    const result = await Frame.deleteOne({ _id: frameId });
-    if (result.deletedCount > 0) this.totalPoints--;
+  async deleteFrame(frameId, userId) {
+    const result = await Frame.deleteOne({ _id: frameId, user: userId });
+    if (result.deletedCount === 0) {
+      throw new Error('Frame not found or not authorized');
+    }
+  }
+
+  async updateIdeaPosition(ideaId, x, y, userId) {
+    const idea = await Idea.findOneAndUpdate(
+      { _id: ideaId, user: userId },
+      { x, y },
+      { new: true }
+    );
+    if (!idea) {
+      throw new Error('Idea not found or not authorized');
+    }
+    return idea;
+  }
+
+  async updateFramePosition(frameId, x, y, userId) {
+    const frame = await Frame.findOneAndUpdate(
+      { _id: frameId, user: userId },
+      { x, y },
+      { new: true }
+    );
+    if (!frame) {
+      throw new Error('Frame not found or not authorized');
+    }
+    return frame;
+  }
+
+  async addProblemStatement(content, user, problemId) {
+    const problemStatement = new ProblemStatement({
+      content,
+      user: user._id,
+      username: user.username,
+      problemId
+    });
+    await problemStatement.save();
+    return problemStatement;
+  }
+
+  async getProblemStatements(userId) {
+    try {
+      return await ProblemStatement.find({ user: userId });
+    } catch (error) {
+      console.error('Error getting problem statements:', error);
+      throw new Error('Failed to retrieve problem statements');
+    }
+  }
+
+  async addConnection(sourceId, targetId, user) {
+    const connection = new Connection({
+      sourceId,
+      targetId,
+      user: user._id,
+      username: user.username,
+    });
+    await connection.save();
+    return connection;
+  }
+
+  async getConnections(userId) {
+    try {
+      return await Connection.find({ user: userId });
+    } catch (error) {
+      console.error('Error getting connections:', error);
+      throw new Error('Failed to retrieve connections');
+    }
+  }
+
+  async totalPoints(userId) {
+    const ideaCount = await Idea.countDocuments({ user: userId });
+    const frameCount = await Frame.countDocuments({ user: userId });
+    return ideaCount + frameCount;
   }
 }
 

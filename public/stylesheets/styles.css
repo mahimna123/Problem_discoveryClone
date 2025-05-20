@@ -49,6 +49,7 @@
     padding: 0;
     overflow: hidden;
     background-color: #e0e0e0;
+    padding-bottom: 80px;
 }
 .problem-statement {
     position: absolute;
@@ -68,6 +69,7 @@
 .problem-statement h2 {
     margin: 0;
     color: #333;
+    font-size: 1.2rem;
 }
 .problem-statement textarea {
     width: 100%;
@@ -76,7 +78,7 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 0.9rem;
     resize: none;
 }
 .add-idea-button {
@@ -138,10 +140,12 @@
 }
 .points {
     position: fixed;
-    bottom: 20px;
-    left: 20px;
-    font-size: 18px;
-    color: #333;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
 }
 .line {
@@ -161,4 +165,46 @@
     font-size: 12px;
     cursor: pointer;
     z-index: 10;
+}
+.save-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  .save-button:hover {
+    background-color: #218838;
+  }
+
+/* Button container styles */
+.button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Make sure the buttons are visible and properly spaced */
+.add-idea-button,
+.save-button,
+.btn-info,
+.btn-secondary {
+    min-width: 120px;
+    margin: 0 5px;
+}
+
+/* Add styles for welcome message */
+.container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
 }
