@@ -514,7 +514,7 @@ router.post('/api/solutions', isLoggedIn, solutionsController.saveSolution);
 router.post('/api/deepseek', isLoggedIn, async (req, res) => {
   try {
     const { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId } = req.body;
-    console.log('Received request data:', { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId }); // Debug log
+    console.log('Received request data:', { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId });
 
     const hfToken = process.env.HUGGINGFACE_API_KEY;
     const Campground = require('../models/campgrounds');
@@ -598,9 +598,10 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
       shouldDo,
       shouldNotDo,
       keyFeatures,
-      implementationSteps
+      implementationSteps,
+      campgroundId
     };
-    console.log('Sending response data:', responseData); // Debug log
+    console.log('Sending response data:', responseData);
 
     // Return the AI's response
     res.json(responseData);
