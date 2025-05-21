@@ -620,7 +620,7 @@ router.get('/solution-details', isLoggedIn, (req, res) => {
   
   console.log('Solution details route - Raw keyFeatures:', keyFeatures);
 
-  // Decode URL parameters and ensure keyFeatures is properly formatted
+  // Decode URL parameters
   const decodedData = {
     title: decodeURIComponent(title || ''),
     detail: decodeURIComponent(detail || ''),
@@ -637,14 +637,9 @@ router.get('/solution-details', isLoggedIn, (req, res) => {
       const decodedFeatures = decodeURIComponent(keyFeatures);
       console.log('Decoded keyFeatures:', decodedFeatures);
       
-      // Check if it's already an array
-      if (Array.isArray(decodedFeatures)) {
-        decodedData.keyFeatures = JSON.stringify(decodedFeatures);
-      } else {
-        // Try to parse as JSON
-        const parsedFeatures = JSON.parse(decodedFeatures);
-        decodedData.keyFeatures = JSON.stringify(parsedFeatures);
-      }
+      // Try to parse as JSON
+      const parsedFeatures = JSON.parse(decodedFeatures);
+      decodedData.keyFeatures = JSON.stringify(parsedFeatures);
     } catch (error) {
       console.error('Error parsing keyFeatures:', error);
       console.error('Raw keyFeatures value:', keyFeatures);

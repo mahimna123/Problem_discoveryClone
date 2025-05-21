@@ -100,9 +100,9 @@ function getKeyFeaturesTableData() {
         const inputs = row.querySelectorAll('input');
         if (inputs[0].value.trim() !== '') {
             features.push({
-                feature: inputs[0].value,
-                format: inputs[1].value,
-                usage: inputs[2].value
+                feature: inputs[0].value.trim(),
+                format: inputs[1].value.trim(),
+                usage: inputs[2].value.trim()
             });
         }
     });
