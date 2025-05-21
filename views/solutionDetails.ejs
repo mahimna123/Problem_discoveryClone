@@ -46,14 +46,20 @@
                                 <tbody>
                                     <% if (keyFeatures && keyFeatures !== '[]') { %>
                                         <% try { %>
-                                            <% const features = JSON.parse(keyFeatures); %>
-                                            <% features.forEach(feature => { %>
+                                            <% const features = typeof keyFeatures === 'string' ? JSON.parse(keyFeatures) : keyFeatures; %>
+                                            <% if (Array.isArray(features) && features.length > 0) { %>
+                                                <% features.forEach(feature => { %>
+                                                    <tr>
+                                                        <td><%= feature.feature || '' %></td>
+                                                        <td><%= feature.format || '' %></td>
+                                                        <td><%= feature.usage || '' %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } else { %>
                                                 <tr>
-                                                    <td><%= feature.feature %></td>
-                                                    <td><%= feature.format %></td>
-                                                    <td><%= feature.usage %></td>
+                                                    <td colspan="3">No features available</td>
                                                 </tr>
-                                            <% }); %>
+                                            <% } %>
                                         <% } catch (error) { %>
                                             <tr>
                                                 <td colspan="3">Error displaying features</td>
