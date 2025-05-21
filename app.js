@@ -114,9 +114,14 @@ app.use(
       connectSrc: ["'self'", "https://api.maptiler.com/"],
       fontSrc: [
         "'self'",
+        "data:",
         "https://fonts.gstatic.com",
         "https://cdn.jsdelivr.net",
         "https://use.fontawesome.com",
+        "https://kit-free.fontawesome.com",
+        "https://stackpath.bootstrapcdn.com",
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com"
       ],
       workerSrc: ["'self'", "blob:"],
       objectSrc: ["'none'"],
