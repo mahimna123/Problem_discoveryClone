@@ -617,15 +617,7 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
 router.get('/solution-details', isLoggedIn, (req, res) => {
   const { title, detail, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId } = req.query;
   
-  console.log('Solution details route - Query parameters:', {
-    title,
-    detail,
-    shouldDo,
-    shouldNotDo,
-    keyFeatures,
-    implementationSteps,
-    campgroundId
-  });
+  console.log('Solution details route - Raw keyFeatures:', keyFeatures);
 
   // Decode URL parameters and ensure keyFeatures is properly formatted
   const decodedData = {
@@ -633,12 +625,33 @@ router.get('/solution-details', isLoggedIn, (req, res) => {
     detail: decodeURIComponent(detail || ''),
     shouldDo: decodeURIComponent(shouldDo || ''),
     shouldNotDo: decodeURIComponent(shouldNotDo || ''),
-    keyFeatures: keyFeatures ? JSON.stringify(JSON.parse(decodeURIComponent(keyFeatures))) : '[]',
+    keyFeatures: '[]', // Default to empty array
     implementationSteps: decodeURIComponent(implementationSteps || ''),
     campgroundId: decodeURIComponent(campgroundId || '')
   };
 
-  console.log('Solution details route - Decoded data:', decodedData);
+  // Safely parse keyFeatures
+  if (keyFeatures) {
+    try {
+      const decodedFeatures = decodeURIComponent(keyFeatures);
+      console.log('Decoded keyFeatures:', decodedFeatures);
+      
+      // Check if it's already an array
+      if (Array.isArray(decodedFeatures)) {
+        decodedData.keyFeatures = JSON.stringify(decodedFeatures);
+      } else {
+        // Try to parse as JSON
+        const parsedFeatures = JSON.parse(decodedFeatures);
+        decodedData.keyFeatures = JSON.stringify(parsedFeatures);
+      }
+    } catch (error) {
+      console.error('Error parsing keyFeatures:', error);
+      console.error('Raw keyFeatures value:', keyFeatures);
+      decodedData.keyFeatures = '[]';
+    }
+  }
+
+  console.log('Solution details route - Final decoded data:', decodedData);
 
   res.render('solutionDetails', {
     ...decodedData,
