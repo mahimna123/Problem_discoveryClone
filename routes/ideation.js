@@ -627,13 +627,13 @@ router.get('/solution-details', isLoggedIn, (req, res) => {
     campgroundId
   });
 
-  // Decode URL parameters
+  // Decode URL parameters and ensure keyFeatures is properly formatted
   const decodedData = {
     title: decodeURIComponent(title || ''),
     detail: decodeURIComponent(detail || ''),
     shouldDo: decodeURIComponent(shouldDo || ''),
     shouldNotDo: decodeURIComponent(shouldNotDo || ''),
-    keyFeatures: keyFeatures || '[]',
+    keyFeatures: keyFeatures ? JSON.stringify(JSON.parse(decodeURIComponent(keyFeatures))) : '[]',
     implementationSteps: decodeURIComponent(implementationSteps || ''),
     campgroundId: decodeURIComponent(campgroundId || '')
   };
