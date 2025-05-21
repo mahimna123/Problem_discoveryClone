@@ -123,33 +123,28 @@ document.getElementById('solutionForm').addEventListener('submit', async functio
         campgroundId: document.getElementById('campgroundId').value
     };
 
-    console.log('Form submission data:', solutionData); // Debug log
+    console.log('Submitting solution data:', solutionData);
 
     try {
         const response = await fetch('/api/deepseek', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(solutionData)
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Response data:', data); // Debug log
-            alert('Technical specifications generated successfully!');
-            
-            // Debug the URL parameters
-            const redirectUrl = `/solution-details?title=${encodeURIComponent(data.title)}&detail=${encodeURIComponent(data.detail)}&shouldDo=${encodeURIComponent(data.shouldDo)}&shouldNotDo=${encodeURIComponent(data.shouldNotDo)}&keyFeatures=${encodeURIComponent(JSON.stringify(data.keyFeatures))}&implementationSteps=${encodeURIComponent(data.implementationSteps)}&campgroundId=${encodeURIComponent(solutionData.campgroundId)}`;
-            console.log('Redirect URL:', redirectUrl); // Debug log
-            
-            window.location.href = redirectUrl;
-        } else {
-            alert('Failed to generate technical specifications. Please try again.');
-        }
+        const data = await response.json();
+        console.log('Received response data:', data);
+
+        // Construct the URL with all parameters
+        const redirectUrl = `/solution-details?title=${encodeURIComponent(data.title)}&detail=${encodeURIComponent(data.detail)}&shouldDo=${encodeURIComponent(data.shouldDo)}&shouldNotDo=${encodeURIComponent(data.shouldNotDo)}&keyFeatures=${encodeURIComponent(JSON.stringify(data.keyFeatures))}&implementationSteps=${encodeURIComponent(data.implementationSteps)}&campgroundId=${encodeURIComponent(data.campgroundId)}`;
+        
+        console.log('Redirecting to:', redirectUrl);
+        window.location.href = redirectUrl;
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while generating technical specifications.');
+        alert('An error occurred while processing your solution.');
     }
 });
 </script> 
