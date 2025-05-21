@@ -26,60 +26,96 @@
         </div>
 
         <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title"><%= campground.title%></h5>
-                <p class="card-text"><%= campground.description%></p>
-                <div class="d-flex gap-2 mb-3">
-                    <a href="/ideation/<%= campground._id %>" class="btn btn-primary">
-                        <i class="fas fa-lightbulb"></i> Start Ideation
-                    </a>
-                    <a href="/ideation/my-brainstorms" class="btn btn-info">
-                        <i class="fas fa-brain"></i> My Brainstorms
-                    </a>
-                    <a href="/define-solution?campgroundId=<%= campground._id %>" class="btn btn-success">
-                        <i class="fas fa-check-circle"></i> Define the Solution
-                    </a>
-                    <% if (campground.solution) { %>
-                    <a href="/solution-details?title=<%= encodeURIComponent(campground.solution.title) %>&detail=<%= encodeURIComponent(campground.solution.detail) %>&keyFeatures=<%= encodeURIComponent(campground.solution.keyFeatures) %>&implementationSteps=<%= encodeURIComponent(campground.solution.implementationSteps) %>" class="btn btn-info ms-2">
-                        <i class="fas fa-eye"></i> View Solution
-                    </a>
-                    <% } %>
+            <div class="row">
+                <div class="col-md-4">
+                    <img class="img-fluid" alt="" src="<%= campground.image %>">
                 </div>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item text-muted"><%= campground.location%></li>
-                <li class="list-group-item">Submitted by <%= campground.author.username%></li>
-            </ul>
-            <% if (campground.solution) { %>
-            <div class="card-body">
-                <a class="btn btn-success" data-bs-toggle="collapse" href="#solutionDetailsCollapse" role="button" aria-expanded="false" aria-controls="solutionDetailsCollapse">
-                    <i class="fas fa-cogs"></i> Solution Details
-                </a>
-                <div class="collapse mt-3" id="solutionDetailsCollapse">
-                    <h5>Title</h5>
-                    <p><%= campground.solution.title %></p>
-                    <h5>Technical Specifications</h5>
-                    <pre><%= campground.solution.detail %></pre>
-                    <h5>Key Features</h5>
-                    <pre><%= campground.solution.keyFeatures %></pre>
-                    <h5>Implementation Steps</h5>
-                    <pre><%= campground.solution.implementationSteps %></pre>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= campground.title %></h5>
+                        <p class="card-text"><%= campground.description %></p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <%= campground.location %>
+                            </small>
+                        </p>
+                        <% if(currentUser && campground.author && campground.author.equals(currentUser._id)) { %>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-success" href="/ideation/<%= campground._id %>">
+                                    <i class="fas fa-lightbulb"></i> Create Ideas
+                                </a>
+                                <a class="btn btn-primary" href="/define-solution?campgroundId=<%= campground._id %>">
+                                    <i class="fas fa-tasks"></i> Define Solution
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
-            </div>
-            <% } %>
-            <%  if( currentUser && campground.author.equals(currentUser._id))  {%>
-            <div class="card-body">
-                <a class="card-link btn btn-info" href="/campgrounds/<%=campground._id%>/edit">Edit</a>
-                <form class="d-inline" action="/campgrounds/<%=campground._id%>?_method=DELETE" method="POST">
-                    <button class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-            <% } %>
-            <div class="card-footer text-muted">
-                2 days ago
             </div>
         </div>
 
+        <% if(campground.solution) { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Solution</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <a href="/solution-details?title=<%= encodeURIComponent(campground.solution.title) %>&detail=<%= encodeURIComponent(campground.solution.detail) %>&shouldDo=<%= encodeURIComponent(campground.solution.shouldDo) %>&shouldNotDo=<%= encodeURIComponent(campground.solution.shouldNotDo) %>&keyFeatures=<%= encodeURIComponent(JSON.stringify(campground.solution.keyFeatures)) %>&implementationSteps=<%= encodeURIComponent(campground.solution.implementationSteps) %>&campgroundId=<%= campground._id %>" class="btn btn-info">
+                            <i class="fas fa-eye"></i> See Solution
+                        </a>
+                    </div>
+                    <div class="solution-preview" style="max-width: 100%; overflow-x: auto;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Component</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Technical Components</td>
+                                        <td style="white-space: pre-wrap;"><%= campground.solution.detail %></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Key Features</td>
+                                        <td style="white-space: pre-wrap;">
+                                            <% if(campground.solution.keyFeatures && campground.solution.keyFeatures.length > 0) { %>
+                                                <% campground.solution.keyFeatures.forEach(function(feature) { %>
+                                                    <div class="mb-2">
+                                                        <strong>Feature:</strong> <%= feature.feature %><br>
+                                                        <strong>Format:</strong> <%= feature.format %><br>
+                                                        <strong>Usage:</strong> <%= feature.usage %>
+                                                    </div>
+                                                <% }); %>
+                                            <% } else { %>
+                                                No key features specified
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Implementation Steps</td>
+                                        <td style="white-space: pre-wrap;"><%= campground.solution.implementationSteps %></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <% if(currentUser && campground.author && campground.author.equals(currentUser._id)) { %>
+            <div class="card-body">
+                <a class="btn btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
+                <form class="d-inline" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        <% } %>
+        <div class="card-footer text-muted">
+            2 days ago
+        </div>
     </div>
     <div class="col-6">
         <% if(currentUser){ %>
