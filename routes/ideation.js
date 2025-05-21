@@ -554,7 +554,11 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
       2. Recommended Tech Stack (compatible with the specified formats and usage patterns)
       3. Detailed Implementation Steps (aligned with the provided requirements)
       4. Required Technical Learning
-      5. Validation steps to ensure the solution meets all requirements and avoids prohibited behaviors
+      5. Budget Calculation:
+         - Hardware Costs (servers, networking equipment, etc.)
+         - Software Costs (licenses, subscriptions, APIs)
+         - Maintenance Costs (first year)
+         Please provide a detailed breakdown of each cost category and total estimated budget.
     `;
 
     // Call the DeepSeek V2 model via Hugging Face Inference Providers
