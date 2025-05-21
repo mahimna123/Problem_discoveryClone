@@ -44,17 +44,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% if (keyFeatures) { %>
-                                        <% JSON.parse(keyFeatures).forEach(feature => { %>
+                                    <% if (keyFeatures && keyFeatures !== '[]') { %>
+                                        <% try { %>
+                                            <% const features = JSON.parse(keyFeatures); %>
+                                            <% features.forEach(feature => { %>
+                                                <tr>
+                                                    <td><%= feature.feature %></td>
+                                                    <td><%= feature.format %></td>
+                                                    <td><%= feature.usage %></td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } catch (error) { %>
                                             <tr>
-                                                <td><%= feature.feature %></td>
-                                                <td><%= feature.format %></td>
-                                                <td><%= feature.usage %></td>
+                                                <td colspan="3">Error displaying features</td>
                                             </tr>
-                                        <% }); %>
+                                        <% } %>
                                     <% } else { %>
                                         <tr>
-                                            <td colspan="3" class="text-center">No key features specified.</td>
+                                            <td colspan="3">No key features specified</td>
                                         </tr>
                                     <% } %>
                                 </tbody>
