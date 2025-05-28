@@ -517,11 +517,17 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
     console.log('Received request data:', { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId });
 
     const hfToken = process.env.HUGGINGFACE_API_KEY;
+    console.log('Hugging Face API Key status:', hfToken ? 'Present' : 'Missing');
+
     const Campground = require('../models/campgrounds');
     const { Solution } = require('../models/schemas');
 
     if (!hfToken) {
-      return res.status(500).json({ error: 'API configuration error: Missing access token' });
+      console.error('API configuration error: Missing Hugging Face API key');
+      return res.status(500).json({ 
+        error: 'API configuration error', 
+        details: 'Missing Hugging Face API key. Please check your environment configuration.' 
+      });
     }
 
     const client = new InferenceClient(hfToken);

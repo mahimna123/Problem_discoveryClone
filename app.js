@@ -1,8 +1,12 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
+// Load environment variables first
 require("dotenv").config();
-console.log(process.env.SECRET);
+
+// Log environment variables for debugging
+console.log('Environment Variables:', {
+  NODE_ENV: process.env.NODE_ENV,
+  HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY ? 'Set' : 'Not Set',
+  DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ? 'Set' : 'Not Set'
+});
 
 const express = require("express");
 const session = require("express-session");
