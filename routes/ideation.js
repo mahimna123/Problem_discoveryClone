@@ -512,6 +512,10 @@ router.post('/api/solutions', isLoggedIn, solutionsController.saveSolution);
 
 // POST route to send solution data to AI API
 router.post('/api/deepseek', isLoggedIn, async (req, res) => {
+  console.log('--- HITTING /api/deepseek ROUTE ---');
+  console.log('User authenticated:', req.isAuthenticated());
+  console.log('User object:', req.user ? { id: req.user._id, username: req.user.username } : 'Not available');
+
   try {
     const { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId } = req.body;
     console.log('Received request data:', { title, shouldDo, shouldNotDo, keyFeatures, implementationSteps, campgroundId });
@@ -572,10 +576,7 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
       provider: "novita",
       model: "deepseek-ai/DeepSeek-Prover-V2-671B",
       messages: [
-        {
-          role: "user",
-          content: userMessage,
-        },
+        { role: "user", content: userMessage },
       ],
     });
 
@@ -607,15 +608,14 @@ router.post('/api/deepseek', isLoggedIn, async (req, res) => {
       implementationSteps,
       campgroundId
     };
-    console.log('Sending response data:', responseData);
-
-    // Return the AI's response
-    res.json(responseData);
+    console.log('Sending JSON response with status:', 200);
+    res.status(200).json(responseData);
 
   } catch (error) {
-    console.error('Error in DeepSeek V2 API call:', error);
+    console.error('Error in DeepSeek V2 API call or solution saving:', error);
+    console.log('Sending error response with status:', 500);
     res.status(500).json({
-      error: 'Failed to generate technical specifications',
+      error: 'Failed to generate technical specifications or save solution',
       details: error.message
     });
   }
