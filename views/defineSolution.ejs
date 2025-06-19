@@ -137,9 +137,8 @@ document.getElementById('solutionForm').addEventListener('submit', async functio
         const data = await response.json();
         console.log('Received response data:', data);
 
-        // Construct the URL with all parameters
-        const redirectUrl = `/solution-details?title=${encodeURIComponent(data.title)}&detail=${encodeURIComponent(data.detail)}&shouldDo=${encodeURIComponent(data.shouldDo)}&shouldNotDo=${encodeURIComponent(data.shouldNotDo)}&keyFeatures=${encodeURIComponent(JSON.stringify(data.keyFeatures))}&implementationSteps=${encodeURIComponent(data.implementationSteps)}&campgroundId=${encodeURIComponent(data.campgroundId)}`;
-        
+        // Redirect to the show page for the campground after saving the solution
+        const redirectUrl = `/campgrounds/${encodeURIComponent(data.campgroundId)}`;
         console.log('Redirecting to:', redirectUrl);
         window.location.href = redirectUrl;
     } catch (error) {
