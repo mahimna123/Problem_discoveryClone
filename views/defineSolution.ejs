@@ -109,11 +109,18 @@ function getKeyFeaturesTableData() {
     return features;
 }
 
-document.getElementById('solutionForm').addEventListener('submit', async function(e) {
+const solutionForm = document.getElementById('solutionForm');
+const submitButton = solutionForm.querySelector('button[type="submit"]');
+
+solutionForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    // Remove any previous error message
+    let errorDiv = document.getElementById('solution-error-message');
+    if (errorDiv) errorDiv.remove();
+
     const keyFeatures = getKeyFeaturesTableData();
-    
     const solutionData = {
         title: document.getElementById('solutionTitle').value,
         shouldDo: document.getElementById('solutionShouldDo').value,
@@ -122,8 +129,6 @@ document.getElementById('solutionForm').addEventListener('submit', async functio
         implementationSteps: document.getElementById('implementationSteps').value,
         campgroundId: document.getElementById('campgroundId').value
     };
-
-    console.log('Submitting solution data:', solutionData);
 
     try {
         const response = await fetch('/api/deepseek', {
@@ -135,15 +140,22 @@ document.getElementById('solutionForm').addEventListener('submit', async functio
         });
 
         const data = await response.json();
-        console.log('Received response data:', data);
-
+        if (!response.ok) {
+            throw new Error(data.error || 'An error occurred while processing your solution.');
+        }
         // Redirect to the show page for the campground after saving the solution
         const redirectUrl = `/campgrounds/${encodeURIComponent(data.campgroundId)}`;
-        console.log('Redirecting to:', redirectUrl);
         window.location.href = redirectUrl;
     } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while processing your solution.');
+        // Show a user-friendly error message above the form
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'solution-error-message';
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.innerText = error.message || 'An error occurred while processing your solution.';
+        solutionForm.parentNode.insertBefore(errorDiv, solutionForm);
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-save"></i> Save Solution';
     }
 });
 </script> 

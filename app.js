@@ -180,3 +180,12 @@ app.delete("/campgrounds/:id", async (req, res) => {
   req.flash("success", "Campground deleted successfully");
   res.redirect("/campgrounds");
 });
+
+// Health check endpoint for Hugging Face API key
+app.get('/health', (req, res) => {
+  const hfKeyPresent = !!process.env.HUGGINGFACE_API_KEY;
+  res.json({
+    status: hfKeyPresent ? 'ok' : 'error',
+    huggingfaceApiKey: hfKeyPresent ? 'present' : 'missing'
+  });
+});
