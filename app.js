@@ -45,6 +45,9 @@ db.once("open", () => {
 
 const app = express();
 
+// Behind Render/Heroku proxy, trust X-Forwarded-* headers so req.protocol becomes https
+app.set('trust proxy', 1);
+
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
