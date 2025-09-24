@@ -1,55 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+<% layout('layouts/boilerplate')%>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erehwon Innovation platform</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
-        integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
-    <link rel="stylesheet" href="/stylesheets/home.css">
-</head>
+<link rel="stylesheet" href="/stylesheets/tailwind-output.css">
 
-<body class="d-flex text-center text-white bg-dark">
-    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-        <header class="mb-auto">
-            <div>
-                <h3 class="float-md-left mb-0">Erehwon Innovation platform</h3>
-                <nav class="nav nav-masthead justify-content-center float-md-right">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    <a class="nav-link" href="/campgrounds">Problem Statements</a>
-                    <a href="/ideation">Ideation Tool</a>
-                    <% if(!currentUser) { %>
-                    <a class="nav-link" href="/login">Login</a>
-                    <a class="nav-link" href="/register">Register</a>
-                    <% } else { %>
-                    <a class="nav-link" href="/logout">Logout</a>
-                    <% } %>
-                </nav>
+<!-- Hero Cards Section -->
+<div class="hero-cards-section">
+    <div class="container">
+        <div class="max-w-[1200px] gap-8 grid grid-cols-1 md:grid-cols-3 px-8 mx-auto">
+            <!-- Card 1: Problem Discovery -->
+            <div class="heroui-card h-[400px]">
+                <img
+                    class="w-full h-full object-cover"
+                    alt="Problem Discovery"
+                    src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                />
+                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <a href="/problems" class="btn btn-success action-btn px-6 py-2">
+                        <i class="fas fa-search me-2"></i>Browse Problem Statements
+                    </a>
+                </div>
             </div>
-        </header>
-        <main class="px-3">
-            <h1>Erehwon Innovation studio</h1>
-            <p class="lead"> Welcome to Erehwon innovation platform <br> Jump right in and explore our many Problem statements try to solve them <br>
-                Feel free to share some of your own and comment on others!</p>
-            <a href="/campgrounds" class="btn btn-lg btn-secondary font-weight-bold border-white bg-white">View
-                Problem Statements</a>
-        </main>
-
-        <footer class="mt-auto text-white-50">
-            <p>&copy; 2025 </p>
-        </footer>
-
-
+            
+            <!-- Card 2: Team Collaboration -->
+            <div class="heroui-card h-[400px]">
+                <img
+                    class="w-full h-full object-cover"
+                    alt="Team Collaboration"
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                />
+                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <a href="/register" class="btn btn-primary action-btn px-6 py-2">
+                        <i class="fas fa-users me-2"></i>Register Your Team
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Card 3: Innovation Solutions -->
+            <div class="heroui-card h-[400px]">
+                <img
+                    class="w-full h-full object-cover"
+                    alt="Innovation Solutions"
+                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                />
+                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <a href="/login" class="btn btn-warning action-btn px-6 py-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
-        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
-        crossorigin="anonymous"></script>
-</body>
-
-</html>
+</div>

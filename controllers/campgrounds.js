@@ -6,7 +6,7 @@ maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
 module.exports.index = async (req, res) => {
     const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', { campgrounds }); // Pass campgrounds data to the template
+    res.render('campgrounds/index', { campgrounds }); // template path unchanged, route base renamed
   }
 
 module.exports.renderNewForm = (req, res) => {
@@ -23,8 +23,8 @@ module.exports.renderNewForm = (req, res) => {
     campground.author = req.user._id;
     await campground.save(); // Whenever we want to send a form request, we encode the data into the url and send a post request with the new tag attached to the database and await and save it
     console.log(campground);
-    req.flash('success', 'successfully made a new campground');
-    res.redirect(`/campgrounds/${campground._id}`);// Once this action is performed, the user should be redirected to the this page
+    req.flash('success', 'Problem created');
+    res.redirect(`/problems/${campground._id}`);
   }
 
   module.exports.showCampground = async (req, res) => {
@@ -37,8 +37,8 @@ module.exports.renderNewForm = (req, res) => {
     .populate('solution');
     
     if(!campground){
-        req.flash('error', 'Cannot find that campground');
-        return res.redirect('/campgrounds')
+        req.flash('error', 'Problem not found');
+        return res.redirect('/problems')
     }
 
     // Create a simplified version of the campground for the map
@@ -84,13 +84,13 @@ module.exports.renderNewForm = (req, res) => {
     console.log(campground)
   }
     await campground.save();
-    req.flash('success', 'successfully made a new campground');
-    res.redirect(`/campgrounds/${campground._id}`)
+    req.flash('success', 'Problem updated');
+    res.redirect(`/problems/${campground._id}`)
   }
 
   module.exports.deleteCampground = async(req, res) =>{
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
-     res.redirect('/campgrounds');
-     req.flash('success', 'successfully made a new campground');
+     res.redirect('/problems');
+     req.flash('success', 'Problem deleted');
   }

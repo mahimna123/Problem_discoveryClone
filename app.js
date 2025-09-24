@@ -26,7 +26,7 @@ const ExpressError = require("./utils/ExpressError");
 const methodOverride = require("method-override");
 
 const userRoutes = require("./routes/users");
-const campgroundRoutes = require("./routes/campgrounds");
+const problemsRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
 const ideationRoutes = require("./routes/ideation");
 const MongoDBStore = require("connect-mongo")(session);
@@ -98,6 +98,7 @@ const styleSrcUrls = [
   "https://cdn.jsdelivr.net",
   "https://cdn.maptiler.com/",
   "https://unpkg.com/",
+  "https://cdnjs.cloudflare.com/",
 ];
 
 app.use(
@@ -115,7 +116,7 @@ app.use(
         "https://images.unsplash.com/",
         "https://api.maptiler.com/",
       ],
-      connectSrc: ["'self'", "https://api.maptiler.com/"],
+      connectSrc: ["'self'", "https://api.maptiler.com/", "https://cdn.maptiler.com/", "https://cdnjs.cloudflare.com/", "https://cdn.jsdelivr.net", "https://unpkg.com/", "https://stackpath.bootstrapcdn.com/"],
       fontSrc: [
         "'self'",
         "data:",
@@ -125,7 +126,8 @@ app.use(
         "https://kit-free.fontawesome.com",
         "https://stackpath.bootstrapcdn.com",
         "https://cdnjs.cloudflare.com",
-        "https://unpkg.com"
+        "https://unpkg.com",
+        "https://cdn.maptiler.com"
       ],
       workerSrc: ["'self'", "blob:"],
       objectSrc: ["'none'"],
@@ -137,7 +139,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
+require("./middleware/passport");
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -151,8 +153,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/", userRoutes);
-app.use("/campgrounds", campgroundRoutes);
-app.use("/campgrounds/:id/reviews", reviewRoutes);
+app.use("/problems", problemsRoutes);
+app.use("/problems/:id/reviews", reviewRoutes);
 app.use("/", ideationRoutes);
 
 app.get("/", (req, res) => {
@@ -174,11 +176,11 @@ app.listen(port, () => {
   console.log(`Serving on port ${port}`);
 });
 
-app.delete("/campgrounds/:id", async (req, res) => {
+app.delete("/problems/:id", async (req, res) => {
   const { id } = req.params;
   await Campground.findByIdAndDelete(id);
   req.flash("success", "Campground deleted successfully");
-  res.redirect("/campgrounds");
+  res.redirect("/problems");
 });
 
 // Health check endpoint for Hugging Face API key

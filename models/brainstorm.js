@@ -1,21 +1,22 @@
 const { Idea, Frame, ProblemStatement, Connection } = require('./schemas');
 
 class Brainstorm {
-  async addIdea(content, x, y, user) {
+  async addIdea(content, x, y, user, problemId) {
     const idea = new Idea({
       content,
       x,
       y,
       user: user._id,
-      username: user.username,
+      username: user.username || user.email,
+      problemId: problemId
     });
     await idea.save();
     return idea;
   }
 
-  async getIdeas(userId) {
+  async getIdeas(userId, problemId) {
     try {
-      return await Idea.find({ user: userId });
+      return await Idea.find({ user: userId, problemId: problemId });
     } catch (error) {
       console.error('Error getting ideas:', error);
       throw new Error('Failed to retrieve ideas');
@@ -29,21 +30,22 @@ class Brainstorm {
     }
   }
 
-  async addFrame(content, x, y, user) {
+  async addFrame(content, x, y, user, problemId) {
     const frame = new Frame({
       content,
       x,
       y,
       user: user._id,
-      username: user.username,
+      username: user.username || user.email,
+      problemId: problemId
     });
     await frame.save();
     return frame;
   }
 
-  async getFrames(userId) {
+  async getFrames(userId, problemId) {
     try {
-      return await Frame.find({ user: userId });
+      return await Frame.find({ user: userId, problemId: problemId });
     } catch (error) {
       console.error('Error getting frames:', error);
       throw new Error('Failed to retrieve frames');
@@ -85,7 +87,7 @@ class Brainstorm {
     const problemStatement = new ProblemStatement({
       content,
       user: user._id,
-      username: user.username,
+      username: user.username || user.email,
       problemId
     });
     await problemStatement.save();
@@ -106,7 +108,7 @@ class Brainstorm {
       sourceId,
       targetId,
       user: user._id,
-      username: user.username,
+      username: user.username || user.email,
     });
     await connection.save();
     return connection;
@@ -121,9 +123,9 @@ class Brainstorm {
     }
   }
 
-  async totalPoints(userId) {
-    const ideaCount = await Idea.countDocuments({ user: userId });
-    const frameCount = await Frame.countDocuments({ user: userId });
+  async totalPoints(userId, problemId) {
+    const ideaCount = await Idea.countDocuments({ user: userId, problemId: problemId });
+    const frameCount = await Frame.countDocuments({ user: userId, problemId: problemId });
     return ideaCount + frameCount;
   }
 }

@@ -59,8 +59,8 @@
                         <input type="hidden" id="campgroundId" value="<%= campgroundId %>">
 
                         <div class="d-flex justify-content-between">
-                            <a href="/campgrounds/<%= campgroundId %>" class="btn btn-secondary me-2">
-                                <i class="fas fa-arrow-left"></i> Back to Problem Statement
+                            <a href="/dashboard" class="btn btn-secondary me-2">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
                             </a>
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Save Solution
@@ -144,7 +144,7 @@ solutionForm.addEventListener('submit', async function(e) {
             throw new Error(data.error || 'An error occurred while processing your solution.');
         }
         // Redirect to the show page for the campground after saving the solution
-        const redirectUrl = `/campgrounds/${encodeURIComponent(data.campgroundId)}`;
+        const redirectUrl = `/problems/${encodeURIComponent(data.campgroundId)}`;
         window.location.href = redirectUrl;
     } catch (error) {
         // Show a user-friendly error message above the form

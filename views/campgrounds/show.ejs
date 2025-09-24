@@ -110,8 +110,8 @@
 
         <% if(currentUser && campground.author && campground.author.equals(currentUser._id)) { %>
             <div class="card-body">
-                <a class="btn btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
-                <form class="d-inline" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                <a class="btn btn-warning" href="/problems/<%= campground._id %>/edit">Edit</a>
+                <form class="d-inline" action="/problems/<%= campground._id %>?_method=DELETE" method="POST">
                     <button class="btn btn-danger">Delete</button>
                 </form>
             </div>
@@ -123,7 +123,7 @@
     <div class="col-6">
         <% if(currentUser){ %>
         <h2>Leave a Review</h2>
-        <form action="/campgrounds/<%=campground._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
+        <form action="/problems/<%=campground._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
             <fieldset class="starability-basic">
                 <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
                     aria-label="No rating." />
@@ -157,7 +157,7 @@
                 </p>
                 <p class="card-text">Review: <%= review.body %></p>
                 <%  if( currentUser && review.author.equals(currentUser._id))  {%>
-                <form action="/campgrounds/<%=campground._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
+                <form action="/problems/<%=campground._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
                     <button class="btn btn-sm btn-danger">Delete</button>
                 </form>
                 <% } %>

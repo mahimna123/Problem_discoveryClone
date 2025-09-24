@@ -1,29 +1,40 @@
 const express = require('express');
 const router = express.Router();
-const catchAsync = require('../utils/catchAsync')
+const catchAsync = require('../utils/catchAsync');
 const User = require('../models/user');
 const passport = require('passport');
-const { storeReturnTo } = require('../middleware');
+const { storeReturnTo, isLoggedIn } = require('../middleware');
 const users = require('../controllers/users');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../utils/email');
 
-router.get ('/register', users.renderRegister);
+// Google OAuth routes
+router.get('/auth/google', 
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
-router.post('/register', catchAsync (users.register));
+router.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    users.googleCallback
+);
 
+// Regular auth routes
+router.get('/register', users.renderRegister);
+router.post('/register', catchAsync(users.register));
 
-router.get('/login', users.renderLogin)
+router.get('/login', users.renderLogin);
+router.post('/login', storeReturnTo, passport.authenticate('local', {failureFlash: true, failureRedirect: '/login'}), users.login);
 
-router.post('/login', storeReturnTo, passport.authenticate('local', {failureFlash:true, failureRedirect: '/login'}), users.login); 
+// Dashboard
+router.get('/dashboard', isLoggedIn, catchAsync(users.renderDashboard));
 
+// Forgot password routes
+router.get('/forgot-password', users.renderForgotPassword);
+router.post('/forgot-password', catchAsync(users.forgotPassword));
 
+router.get('/reset-password/:token', users.renderResetPassword);
+router.post('/reset-password/:token', catchAsync(users.resetPassword));
 
+router.get('/logout', users.logout);
 
-// router.get('/logout', (req,res) => {
-//     req.logout();
-//     req.flash('success', "Goodbye!");
-//     res.redirect('/campgrounds');
-// })
-
-router.get('/logout', users.logout); 
-
-module.exports = router; 
+module.exports = router;

@@ -8,6 +8,24 @@
                     alt="" class="card-img-top" />
                 <div class="card-body">
                     <h5 class="card-title">Login</h5>
+                    
+                    <!-- Google OAuth Button (only show if configured) -->
+                    <% if (process.env.GOOGLE_CLIENT_ID) { %>
+                    <div class="d-grid mb-3">
+                        <a href="/auth/google" class="btn btn-outline-danger">
+                            <i class="fab fa-google me-2"></i>Login with Google
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mb-3">
+                        <span class="text-muted">or</span>
+                    </div>
+                    <% } else { %>
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-info-circle me-1"></i>Google OAuth not configured. Please set up GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your environment variables.</small>
+                    </div>
+                    <% } %>
+                    
                     <form action="/login" method="POST" class="validated-form" novalidate>
                         <div class="mb-3">
                             <label class="form-label" for="username">Username</label>
@@ -24,8 +42,19 @@
                                 Looks good!
                             </div>
                         </div>
-                        <button class="btn btn-success btn-block">Login</button>
+
+                        <div class="mb-3">
+                            <button class="btn btn-success">Login</button>
+                        </div>
                     </form>
+                    
+                    <div class="text-center">
+                        <a href="/forgot-password" class="btn btn-link fw-semibold">Forgot your password?</a>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Don't have an account? <a href="/register" class="text-decoration-none">Register here</a></small>
+                    </div>
                 </div>
             </div>
         </div>

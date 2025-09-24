@@ -6,7 +6,8 @@ const ideaSchema = new mongoose.Schema({
   y: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true }
+  username: { type: String, required: true },
+  problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campground', required: true }
 });
 
 const frameSchema = new mongoose.Schema({
@@ -15,7 +16,8 @@ const frameSchema = new mongoose.Schema({
   y: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true }
+  username: { type: String, required: true },
+  problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campground', required: true }
 });
 
 const problemStatementSchema = new mongoose.Schema({

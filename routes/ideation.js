@@ -173,11 +173,15 @@ router.get('/ideation/:problemId', isLoggedIn, async (req, res) => {
   }
 });
 
-// Get all ideas for the logged-in user
+// Get all ideas for the logged-in user and specific problem
 router.get('/api/ideas', isLoggedIn, async (req, res) => {
   try {
-    const ideas = await Brainstorm.getIdeas(req.user._id);
-    console.log('Fetched ideas for user:', { id: req.user._id, ideas });
+    const { problemId } = req.query;
+    if (!problemId) {
+      return res.status(400).json({ error: 'Problem ID is required' });
+    }
+    const ideas = await Brainstorm.getIdeas(req.user._id, problemId);
+    console.log('Fetched ideas for user:', { id: req.user._id, problemId, ideas });
     res.json(ideas);
   } catch (error) {
     console.error('Error fetching ideas:', error.message, error.stack);
@@ -185,11 +189,15 @@ router.get('/api/ideas', isLoggedIn, async (req, res) => {
   }
 });
 
-// Get all frames for the logged-in user
+// Get all frames for the logged-in user and specific problem
 router.get('/api/frames', isLoggedIn, async (req, res) => {
   try {
-    const frames = await Brainstorm.getFrames(req.user._id);
-    console.log('Fetched frames for user:', { id: req.user._id, frames });
+    const { problemId } = req.query;
+    if (!problemId) {
+      return res.status(400).json({ error: 'Problem ID is required' });
+    }
+    const frames = await Brainstorm.getFrames(req.user._id, problemId);
+    console.log('Fetched frames for user:', { id: req.user._id, problemId, frames });
     res.json(frames);
   } catch (error) {
     console.error('Error fetching frames:', error.message, error.stack);
@@ -201,12 +209,15 @@ router.get('/api/frames', isLoggedIn, async (req, res) => {
 router.post('/api/ideas', isLoggedIn, async (req, res) => {
   try {
     console.log('Creating idea for user:', { id: req.user._id, username: req.user.username });
-    const { content, x, y } = req.body;
-    const newIdea = await Brainstorm.addIdea(content, x, y, req.user);
-    console.log('Added idea:', { id: req.user._id, idea: newIdea });
+    const { content, x, y, problemId } = req.body;
+    if (!problemId) {
+      return res.status(400).json({ error: 'Problem ID is required' });
+    }
+    const newIdea = await Brainstorm.addIdea(content, x, y, req.user, problemId);
+    console.log('Added idea:', { id: req.user._id, problemId, idea: newIdea });
     res.status(201).json({
       id: newIdea._id,
-      totalPoints: await Brainstorm.totalPoints(req.user._id),
+      totalPoints: await Brainstorm.totalPoints(req.user._id, problemId),
     });
   } catch (error) {
     console.error('Error adding idea:', error.message, error.stack);
@@ -218,12 +229,15 @@ router.post('/api/ideas', isLoggedIn, async (req, res) => {
 router.post('/api/frames', isLoggedIn, async (req, res) => {
   try {
     console.log('Creating frame for user:', { id: req.user._id, username: req.user.username });
-    const { content, x, y } = req.body;
-    const newFrame = await Brainstorm.addFrame(content, x, y, req.user);
-    console.log('Added frame:', { id: req.user._id, frame: newFrame });
+    const { content, x, y, problemId } = req.body;
+    if (!problemId) {
+      return res.status(400).json({ error: 'Problem ID is required' });
+    }
+    const newFrame = await Brainstorm.addFrame(content, x, y, req.user, problemId);
+    console.log('Added frame:', { id: req.user._id, problemId, frame: newFrame });
     res.status(201).json({
       id: newFrame._id,
-      totalPoints: await Brainstorm.totalPoints(req.user._id),
+      totalPoints: await Brainstorm.totalPoints(req.user._id, problemId),
     });
   } catch (error) {
     console.error('Error adding frame:', error.message, error.stack);

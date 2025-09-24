@@ -20,12 +20,18 @@ async function initialize() {
 async function loadData() {
   console.log('Loading data...');
   try {
+    const problemId = document.getElementById('problem-id')?.value;
+    if (!problemId) {
+      console.error('Problem ID not found');
+      return;
+    }
+    
     const [ideas, frames] = await Promise.all([
-      fetch('/api/ideas').then(res => {
+      fetch(`/api/ideas?problemId=${problemId}`).then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       }),
-      fetch('/api/frames').then(res => {
+      fetch(`/api/frames?problemId=${problemId}`).then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
@@ -53,10 +59,16 @@ async function addIdea() {
     document.body.appendChild(idea);
     console.log('Idea element created and appended');
 
+    const problemId = document.getElementById('problem-id')?.value;
+    if (!problemId) {
+      console.error('Problem ID not found');
+      return;
+    }
+    
     const response = await fetch('/api/ideas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '', x: ideaX, y: ideaY })
+      body: JSON.stringify({ content: '', x: ideaX, y: ideaY, problemId: problemId })
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
@@ -188,10 +200,16 @@ async function defineFrame(source, target, line, defineFrameButton) {
   document.body.appendChild(frameBox);
   line.remove();
   try {
+    const problemId = document.getElementById('problem-id')?.value;
+    if (!problemId) {
+      console.error('Problem ID not found');
+      return;
+    }
+    
     const response = await fetch('/api/frames', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '', x: buttonRect.left, y: buttonRect.top })
+      body: JSON.stringify({ content: '', x: buttonRect.left, y: buttonRect.top, problemId: problemId })
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();

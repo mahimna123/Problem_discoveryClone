@@ -2,9 +2,9 @@
 
 <div id="cluster-map"></div>
 <div class="container">
-<h1>All Problem Statements </h1>
+<h1>All Problems </h1>
 <div>
-    <a href="/campgrounds/new">Add Problem Statement</a>
+    <a href="/problems/new">Add Problem</a>
 </div>
 <% for (let campground of campgrounds){%>
 <div class="card" mb-3>
@@ -24,7 +24,7 @@
                 <p class="card-text">
                     <small class="text-muted"><%= campground.location%></small>
                 </p>
-                <a class="btn btn-primary" href="/campgrounds/<%=campground._id%>">View <%=campground.title%></a>
+                <a class="btn btn-primary" href="/problems/<%=campground._id%>">View <%=campground.title%></a>
             </div>
         </div>
     </div>

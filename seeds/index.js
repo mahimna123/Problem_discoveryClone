@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const cities = require('./cities');
 const { places, descriptors } = require('./seedHelpers');
-const Campground = require('../models/campground');
+const Campground = require('../models/campgrounds');
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
+mongoose.connect('mongodb://localhost:27017/problem_discovery', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -26,6 +26,8 @@ const seedDB = async () => {
             author: '675935f1d2e2455f1c452680',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
+            problem: `This is a sample problem statement: ${sample(descriptors)} ${sample(places)} in ${cities[random1000].city}`,
+            description: `Detailed description of the problem: ${sample(descriptors)} ${sample(places)} affects many people in ${cities[random1000].city}, ${cities[random1000].state}. This problem requires innovative solutions and community involvement.`,
             geometry: {
                 type: 'Point',
                 coordinates: [
