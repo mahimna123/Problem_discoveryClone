@@ -4,11 +4,30 @@ const Campground = require('./models/campgrounds');
 const Review = require('./models/review');
 
 module.exports.isLoggedIn = (req, res, next) => {
+    console.log('=== AUTHENTICATION CHECK ===');
+    console.log('Path:', req.path);
+    console.log('Method:', req.method);
+    console.log('Authenticated:', req.isAuthenticated());
+    console.log('User:', req.user);
+    console.log('Session ID:', req.sessionID);
+    
     if (!req.isAuthenticated()) {
         req.session.returnTo = req.originalUrl;
         req.flash('error', 'You must be signed in first!');
+        
+        // Check if this is an API request
+        if (req.path.startsWith('/api/')) {
+            console.log('API request - returning 401');
+            return res.status(401).json({ 
+                error: 'Authentication required',
+                message: 'You must be signed in first!'
+            });
+        }
+        
+        console.log('Web request - redirecting to login');
         return res.redirect('/login');
     }
+    console.log('User authenticated - proceeding');
     next();
 }
 

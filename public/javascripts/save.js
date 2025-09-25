@@ -3,6 +3,16 @@ function saveBoard() {
   
     // Get the problem statement ID from the hidden input
     const problemId = document.getElementById('problem-id')?.value;
+    console.log('=== FRONTEND DEBUG ===');
+    console.log('Problem ID from hidden input:', problemId);
+    console.log('Problem ID element exists:', !!document.getElementById('problem-id'));
+    
+    // Check if problemId is missing
+    if (!problemId) {
+      console.error('Problem ID is missing! Cannot save without a problem context.');
+      showSaveError('Error: No problem selected. Please go back to the dashboard and select a problem to ideate on.');
+      return;
+    }
   
     // Collect all ideas and frames from the DOM
     const ideas = Array.from(document.querySelectorAll('.idea')).map(idea => {
@@ -43,6 +53,9 @@ function saveBoard() {
                problemStatementElement?.querySelector('p')?.innerText.trim() || '',
       problemId: problemId // Use the problem ID from hidden input
     };
+    
+    console.log('Problem statement object:', problemStatement);
+    console.log('Problem statement problemId:', problemStatement.problemId);
   
     // Collect connections (lines between elements)
     const connections = Array.from(document.querySelectorAll('.connection-line'))
@@ -74,6 +87,7 @@ function saveBoard() {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'same-origin', // Include cookies in the request
       body: JSON.stringify(dataToSave),
     };
     console.log('Fetch request options:', requestOptions);
@@ -83,6 +97,9 @@ function saveBoard() {
       .then(response => {
         console.log('Fetch response status:', response.status);
         if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Authentication required. Please log in again.');
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
@@ -93,7 +110,11 @@ function saveBoard() {
       })
       .catch(error => {
         console.error('Error saving board:', error);
-        showSaveError('Failed to save your ideas. Please try again.');
+        if (error.message.includes('Authentication required')) {
+          showSaveError('Session expired. Please refresh the page and log in again.');
+        } else {
+          showSaveError('Failed to save your ideas. Please try again.');
+        }
       });
   }
   

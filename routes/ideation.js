@@ -17,14 +17,9 @@ router.get('/ideation', isLoggedIn, (req, res) => {
     username: req.user.username
   });
   
-  const renderData = { 
-    currentUser: req.user,
-    problem: null,
-    problemStatement: null
-  };
-  
-  console.log('4. Data being passed to view:', renderData);
-  res.render('brainstorm', renderData);
+  // Redirect to dashboard if no problemId is provided
+  req.flash('error', 'Please select a problem to start ideating');
+  res.redirect('/dashboard');
 });
 
 // View user's ideas and frames - This needs to come BEFORE the /:problemId route
@@ -43,14 +38,16 @@ router.get('/ideation/my-brainstorms', isLoggedIn, async (req, res) => {
   });
 
   console.log('2. Attempting to fetch ideas...');
-  const ideas = await Brainstorm.getIdeas(req.user._id);
+  // Get all ideas for the user across all problems
+  const ideas = await Idea.find({ user: req.user._id }).populate('problemId');
   console.log('Ideas fetched:', {
     count: ideas.length,
     firstIdea: ideas[0] || 'No ideas found'
   });
 
   console.log('3. Attempting to fetch frames...');
-  const frames = await Brainstorm.getFrames(req.user._id);
+  // Get all frames for the user across all problems
+  const frames = await Frame.find({ user: req.user._id }).populate('problemId');
   console.log('Frames fetched:', {
     count: frames.length,
     firstFrame: frames[0] || 'No frames found'
@@ -298,9 +295,20 @@ router.delete('/api/frames/:id', isLoggedIn, async (req, res) => {
 // Save all board data
 router.post('/api/save', isLoggedIn, async (req, res) => {
   try {
+    console.log('=== SAVE ROUTE DEBUG ===');
+    console.log('User authenticated:', req.isAuthenticated());
+    console.log('User object:', req.user);
+    console.log('Session ID:', req.sessionID);
     console.log('Saving data for user:', { id: req.user._id, username: req.user.username });
     console.log('Received data:', req.body);
     const { ideas = [], frames = [], problemStatement = {}, connections = [], username } = req.body;
+    
+    console.log('=== DETAILED DEBUG INFO ===');
+    console.log('Ideas count:', ideas.length);
+    console.log('Frames count:', frames.length);
+    console.log('Problem statement:', problemStatement);
+    console.log('Problem statement problemId:', problemStatement.problemId);
+    console.log('Problem statement type:', typeof problemStatement.problemId);
 
     // Validate inputs
     if (!Array.isArray(ideas)) {
@@ -323,6 +331,12 @@ router.post('/api/save', isLoggedIn, async (req, res) => {
       console.warn('Client username mismatch:', { client: username, server: req.user.username });
     }
 
+    // Validate that problemId is available
+    if (!problemStatement.problemId) {
+      console.error('Validation error: Problem ID is missing from problem statement', { problemStatement });
+      return res.status(400).json({ error: 'Problem ID is required to save ideas and frames' });
+    }
+
     // Log user ID before deletion
     console.log('User ID for deletion:', req.user._id);
 
@@ -335,7 +349,8 @@ router.post('/api/save', isLoggedIn, async (req, res) => {
           idea.content || '',
           idea.x || 0,
           idea.y || 0,
-          req.user
+          req.user,
+          problemStatement.problemId
         );
         savedIdeas.push(savedIdea);
         console.log('Saved idea:', { _id: savedIdea._id, user: savedIdea.user });
@@ -354,7 +369,8 @@ router.post('/api/save', isLoggedIn, async (req, res) => {
           frame.content || '',
           frame.x || 0,
           frame.y || 0,
-          req.user
+          req.user,
+          problemStatement.problemId
         );
         savedFrames.push(savedFrame);
         console.log('Saved frame:', { _id: savedFrame._id, user: savedFrame.user });
@@ -412,13 +428,24 @@ router.post('/api/save', isLoggedIn, async (req, res) => {
       }
     }
 
-    const totalPoints = await Brainstorm.totalPoints(req.user._id);
+    const totalPoints = await Brainstorm.totalPoints(req.user._id, problemStatement.problemId);
     console.log('Total points after save:', totalPoints);
 
     res.status(200).json({ message: 'Board saved', totalPoints });
   } catch (error) {
-    console.error('Error saving board:', error.message, error.stack);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+    console.error('=== ERROR IN SAVE ROUTE ===');
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    console.error('Request body:', req.body);
+    console.error('User:', req.user ? { id: req.user._id, username: req.user.username } : 'No user');
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
