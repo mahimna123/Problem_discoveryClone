@@ -256,7 +256,11 @@ function createFrameBox(id, content, x, y) {
   return frameBox;
 }
 
+// Make function globally accessible
+window.addIdeaToFrame = addIdeaToFrame;
+
 async function addIdeaToFrame(frameBox) {
+  alert('AddIdeaToFrame called! Frame ID: ' + frameBox.id);
   console.log('Adding idea to frame:', frameBox.id, frameBox.dataset.id);
   const frameRect = frameBox.getBoundingClientRect();
   const angle = Math.random() * 2 * Math.PI;
