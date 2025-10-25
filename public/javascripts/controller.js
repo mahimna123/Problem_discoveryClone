@@ -173,6 +173,9 @@ async function savePosition(element) {
 
 function drawLine(source, target, includeDefineFrameButton = true) {
   console.log('Drawing line from:', source.id, 'to:', target.id);
+  console.log('Source element:', source);
+  console.log('Target element:', target);
+  
   const line = document.createElement('div');
   line.className = 'line';
   if (!source.id) source.id = `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -180,6 +183,7 @@ function drawLine(source, target, includeDefineFrameButton = true) {
   line.dataset.sourceId = source.id;
   line.dataset.targetId = target.id;
   document.body.appendChild(line);
+  console.log('Line element created:', line);
   updateLine(source, target, line);
   console.log('Line created and positioned:', line.style.left, line.style.top, line.style.width, line.style.transform);
 
