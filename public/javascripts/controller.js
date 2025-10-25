@@ -253,6 +253,7 @@ function createFrameBox(id, content, x, y) {
 }
 
 async function addIdeaToFrame(frameBox) {
+  console.log('Adding idea to frame:', frameBox.id, frameBox.dataset.id);
   const frameRect = frameBox.getBoundingClientRect();
   const angle = Math.random() * 2 * Math.PI;
   const distance = 150;
@@ -273,8 +274,14 @@ async function addIdeaToFrame(frameBox) {
     Brainstorm.totalPoints = data.totalPoints;
     updatePoints(data.totalPoints);
     
+    // Ensure frameBox has an ID before drawing the line
+    if (!frameBox.id && frameBox.dataset.id) {
+      frameBox.id = `element-${frameBox.dataset.id}`;
+    }
+    
     // Add a small delay to ensure the element is fully rendered before drawing the line
     setTimeout(() => {
+      console.log('Drawing line from frame:', frameBox.id, 'to idea:', idea.id);
       drawLine(frameBox, idea, false);
     }, 10);
   } catch (error) {
@@ -293,6 +300,16 @@ function updateLine(source, target, line) {
   const deltaY = targetCenterY - sourceCenterY;
   const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+  
+  console.log('Updating line:', {
+    source: source.id,
+    target: target.id,
+    sourceCenter: { x: sourceCenterX, y: sourceCenterY },
+    targetCenter: { x: targetCenterX, y: targetCenterY },
+    distance: distance,
+    angle: angle
+  });
+  
   line.style.width = `${distance}px`;
   line.style.left = `${sourceCenterX}px`;
   line.style.top = `${sourceCenterY}px`;
