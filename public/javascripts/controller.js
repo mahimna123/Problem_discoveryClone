@@ -262,23 +262,38 @@ window.addIdeaToFrame = addIdeaToFrame;
 async function addIdeaToFrame(frameBox) {
   alert('AddIdeaToFrame called! Frame ID: ' + frameBox.id);
   console.log('Adding idea to frame:', frameBox.id, frameBox.dataset.id);
-  const frameRect = frameBox.getBoundingClientRect();
-  const angle = Math.random() * 2 * Math.PI;
-  const distance = 150;
-  const ideaX = frameRect.left + frameRect.width / 2 + Math.cos(angle) * distance;
-  const ideaY = frameRect.top + frameRect.height / 2 + Math.sin(angle) * distance;
-  const idea = createIdeaElement(null, `Idea ${document.querySelectorAll('.idea').length + 1}`, ideaX, ideaY);
-  document.body.appendChild(idea);
+  
   try {
+    const frameRect = frameBox.getBoundingClientRect();
+    console.log('Frame rect:', frameRect);
+    
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = 150;
+    const ideaX = frameRect.left + frameRect.width / 2 + Math.cos(angle) * distance;
+    const ideaY = frameRect.top + frameRect.height / 2 + Math.sin(angle) * distance;
+    console.log('Calculated idea position:', { ideaX, ideaY });
+    
+    const idea = createIdeaElement(null, `Idea ${document.querySelectorAll('.idea').length + 1}`, ideaX, ideaY);
+    console.log('Created idea element:', idea);
+    
+    document.body.appendChild(idea);
+    console.log('Idea appended to body');
+    
     const response = await fetch('/api/ideas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: '', x: ideaX, y: ideaY })
     });
+    console.log('API response received:', response.ok);
+    
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
+    console.log('API data:', data);
+    
     idea.dataset.id = data.id;
     idea.id = `element-${data.id}`;
+    console.log('Idea ID set:', idea.id);
+    
     Brainstorm.totalPoints = data.totalPoints;
     updatePoints(data.totalPoints);
     
@@ -286,14 +301,17 @@ async function addIdeaToFrame(frameBox) {
     if (!frameBox.id && frameBox.dataset.id) {
       frameBox.id = `element-${frameBox.dataset.id}`;
     }
+    console.log('Frame ID before drawing line:', frameBox.id);
     
     // Add a small delay to ensure the element is fully rendered before drawing the line
     setTimeout(() => {
-      console.log('Drawing line from frame:', frameBox.id, 'to idea:', idea.id);
+      console.log('About to draw line from frame:', frameBox.id, 'to idea:', idea.id);
       drawLine(frameBox, idea, false);
+      console.log('drawLine called successfully');
     }, 10);
   } catch (error) {
     console.error('Error adding idea to frame:', error);
+    alert('Error: ' + error.message);
   }
 }
 
