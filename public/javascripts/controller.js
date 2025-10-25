@@ -172,6 +172,7 @@ async function savePosition(element) {
 }
 
 function drawLine(source, target, includeDefineFrameButton = true) {
+  console.log('Drawing line from:', source.id, 'to:', target.id);
   const line = document.createElement('div');
   line.className = 'line';
   if (!source.id) source.id = `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -180,6 +181,7 @@ function drawLine(source, target, includeDefineFrameButton = true) {
   line.dataset.targetId = target.id;
   document.body.appendChild(line);
   updateLine(source, target, line);
+  console.log('Line created and positioned:', line.style.left, line.style.top, line.style.width, line.style.transform);
 
   if (includeDefineFrameButton && !target.classList.contains('frame-box')) {
     const defineFrameButton = document.createElement('button');
@@ -270,7 +272,11 @@ async function addIdeaToFrame(frameBox) {
     idea.id = `element-${data.id}`;
     Brainstorm.totalPoints = data.totalPoints;
     updatePoints(data.totalPoints);
-    drawLine(frameBox, idea, false);
+    
+    // Add a small delay to ensure the element is fully rendered before drawing the line
+    setTimeout(() => {
+      drawLine(frameBox, idea, false);
+    }, 10);
   } catch (error) {
     console.error('Error adding idea to frame:', error);
   }

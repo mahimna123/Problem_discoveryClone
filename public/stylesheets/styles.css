@@ -151,9 +151,10 @@
 .line {
     position: absolute;
     background-color: #333;
-    height: 2px;
+    height: 3px;
     transform-origin: 0 0;
     z-index: 5; /* Ensure lines are above the background but below elements */
+    border-radius: 1px;
 }
 .define-frame-button {
     position: absolute;
