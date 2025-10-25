@@ -12,9 +12,21 @@ async function initialize() {
     } else {
       console.error('Add Idea button not found in DOM');
     }
+    updateExistingFrameBoxButtons();
   } catch (error) {
     console.error('Initialization error:', error);
   }
+}
+
+function updateExistingFrameBoxButtons() {
+  const frameBoxes = document.querySelectorAll('.frame-box');
+  frameBoxes.forEach(frameBox => {
+    const button = frameBox.querySelector('.add-more-ideas-button');
+    if (button) {
+      button.onclick = () => addIdeaToFrame(frameBox);
+    }
+  });
+  console.log(`Updated ${frameBoxes.length} existing frame box buttons`);
 }
 
 async function loadData() {
