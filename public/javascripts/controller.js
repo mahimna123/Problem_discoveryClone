@@ -268,8 +268,57 @@ function createFrameBox(id, content, x, y) {
   return frameBox;
 }
 
-// Make function globally accessible
-window.addIdeaToFrame = addIdeaToFrame;
+// Simple function to draw line between any two elements
+function drawSimpleLine(element1, element2) {
+  const line = document.createElement('div');
+  line.className = 'line';
+  line.style.position = 'absolute';
+  line.style.backgroundColor = '#ff0000';
+  line.style.height = '6px';
+  line.style.zIndex = '5';
+  
+  const rect1 = element1.getBoundingClientRect();
+  const rect2 = element2.getBoundingClientRect();
+  
+  const x1 = rect1.left + rect1.width / 2;
+  const y1 = rect1.top + rect1.height / 2;
+  const x2 = rect2.left + rect2.width / 2;
+  const y2 = rect2.top + rect2.height / 2;
+  
+  const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+  
+  line.style.width = distance + 'px';
+  line.style.left = x1 + 'px';
+  line.style.top = y1 + 'px';
+  line.style.transform = `rotate(${angle}deg)`;
+  
+  document.body.appendChild(line);
+  console.log('Simple line drawn between elements');
+}
+
+// Override the addIdeaToFrame function with a simple version
+window.addIdeaToFrame = function(frameBox) {
+  console.log('Simple addIdeaToFrame called for:', frameBox);
+  
+  // Create a simple idea element
+  const idea = document.createElement('div');
+  idea.className = 'idea';
+  idea.style.position = 'absolute';
+  idea.style.left = '500px';
+  idea.style.top = '300px';
+  idea.style.width = '120px';
+  idea.style.height = '120px';
+  idea.style.backgroundColor = '#ffeb3b';
+  idea.style.borderRadius = '8px';
+  idea.style.padding = '10px';
+  idea.innerHTML = '<textarea placeholder="New Idea"></textarea><button onclick="this.parentElement.remove()">Delete</button>';
+  
+  document.body.appendChild(idea);
+  
+  // Draw line between frame box and new idea
+  drawSimpleLine(frameBox, idea);
+};
 
 async function addIdeaToFrame(frameBox) {
   const frameRect = frameBox.getBoundingClientRect();
