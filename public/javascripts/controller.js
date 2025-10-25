@@ -247,7 +247,7 @@ function createFrameBox(id, content, x, y) {
   frameBox.id = id ? `element-${id}` : '';
   frameBox.innerHTML = `
     <textarea placeholder="${content}"></textarea>
-    <button class="add-more-ideas-button" onclick="addIdeaToFrame(this.parentElement)">Add More Ideas</button>
+    <button class="add-more-ideas-button" onclick="alert('Button clicked!'); addIdeaToFrame(this.parentElement)">Add More Ideas</button>
     <button class="delete-button" onclick="deleteIdea(this)">Delete</button>
   `;
   frameBox.style.left = `${x}px`;
