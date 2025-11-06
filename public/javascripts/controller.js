@@ -23,7 +23,14 @@ function updateExistingFrameBoxButtons() {
   frameBoxes.forEach(frameBox => {
     const button = frameBox.querySelector('.add-more-ideas-button');
     if (button) {
-      button.onclick = () => addIdeaToFrame(frameBox);
+      // Remove any existing listeners
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      // Add event listener
+      newButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        addIdeaToFrame(frameBox);
+      });
     }
   });
   console.log(`Updated ${frameBoxes.length} existing frame box buttons`);
@@ -188,16 +195,38 @@ function drawLine(source, target, includeDefineFrameButton = true) {
   console.log('Source element:', source);
   console.log('Target element:', target);
   
+  // Ensure source and target have IDs
+  if (!source.id) {
+    if (source.dataset.id) {
+      source.id = `element-${source.dataset.id}`;
+    } else {
+      source.id = `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+  }
+  if (!target.id) {
+    if (target.dataset.id) {
+      target.id = `element-${target.dataset.id}`;
+    } else {
+      target.id = `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+  }
+  
   const line = document.createElement('div');
   line.className = 'line';
-  if (!source.id) source.id = `element-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  if (!target.id) target.id = `element-${target.dataset.id || Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  line.style.position = 'absolute';
+  line.style.zIndex = '5';
   line.dataset.sourceId = source.id;
   line.dataset.targetId = target.id;
   document.body.appendChild(line);
   console.log('Line element created:', line);
   updateLine(source, target, line);
-  console.log('Line created and positioned:', line.style.left, line.style.top, line.style.width, line.style.transform);
+  console.log('Line created and positioned:', {
+    left: line.style.left,
+    top: line.style.top,
+    width: line.style.width,
+    transform: line.style.transform,
+    element: line
+  });
 
   if (includeDefineFrameButton && !target.classList.contains('frame-box')) {
     const defineFrameButton = document.createElement('button');
@@ -259,131 +288,347 @@ function createFrameBox(id, content, x, y) {
   frameBox.id = id ? `element-${id}` : '';
   frameBox.innerHTML = `
     <textarea placeholder="${content}"></textarea>
-    <button class="add-more-ideas-button" onclick="addIdeaToFrame(this.parentElement)">Add More Ideas</button>
+    <button class="add-more-ideas-button">Add More Ideas</button>
     <button class="delete-button" onclick="deleteIdea(this)">Delete</button>
   `;
   frameBox.style.left = `${x}px`;
   frameBox.style.top = `${y}px`;
+  
+  // Attach event listener to the button
+  const addButton = frameBox.querySelector('.add-more-ideas-button');
+  if (addButton) {
+    addButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      addIdeaToFrame(frameBox);
+    });
+  }
+  
   makeDraggable(frameBox);
   return frameBox;
 }
 
-// Simple function to draw line between any two elements
-function drawSimpleLine(element1, element2) {
-  const line = document.createElement('div');
-  line.className = 'line';
-  line.style.position = 'absolute';
-  line.style.backgroundColor = '#ff0000';
-  line.style.height = '6px';
-  line.style.zIndex = '5';
-  
-  const rect1 = element1.getBoundingClientRect();
-  const rect2 = element2.getBoundingClientRect();
-  
-  const x1 = rect1.left + rect1.width / 2;
-  const y1 = rect1.top + rect1.height / 2;
-  const x2 = rect2.left + rect2.width / 2;
-  const y2 = rect2.top + rect2.height / 2;
-  
-  const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-  
-  line.style.width = distance + 'px';
-  line.style.left = x1 + 'px';
-  line.style.top = y1 + 'px';
-  line.style.transform = `rotate(${angle}deg)`;
-  
-  document.body.appendChild(line);
-  console.log('Simple line drawn between elements');
-}
-
-// Override the addIdeaToFrame function with a simple version
-window.addIdeaToFrame = function(frameBox) {
-  console.log('Simple addIdeaToFrame called for:', frameBox);
-  
-  // Create a simple idea element
-  const idea = document.createElement('div');
-  idea.className = 'idea';
-  idea.style.position = 'absolute';
-  idea.style.left = '500px';
-  idea.style.top = '300px';
-  idea.style.width = '120px';
-  idea.style.height = '120px';
-  idea.style.backgroundColor = '#ffeb3b';
-  idea.style.borderRadius = '8px';
-  idea.style.padding = '10px';
-  idea.innerHTML = '<textarea placeholder="New Idea"></textarea><button onclick="this.parentElement.remove()">Delete</button>';
-  
-  document.body.appendChild(idea);
-  
-  // Draw line between frame box and new idea
-  drawSimpleLine(frameBox, idea);
-};
-
 async function addIdeaToFrame(frameBox) {
-  const frameRect = frameBox.getBoundingClientRect();
+  console.log('=== addIdeaToFrame CALLED ===');
+  console.log('Frame box:', frameBox);
+  console.log('Frame box ID:', frameBox.id);
+  console.log('Frame box dataset.id:', frameBox.dataset.id);
+  
+  // Ensure frameBox has an ID
+  if (!frameBox.id && frameBox.dataset.id) {
+    frameBox.id = `element-${frameBox.dataset.id}`;
+    console.log('Set frameBox.id to:', frameBox.id);
+  }
+  if (!frameBox.id) {
+    console.error('Frame box does not have an ID - cannot create connection');
+    alert('Error: Frame box does not have an ID. Please refresh the page.');
+    return;
+  }
+  
+  // Get frame position using computed style (document coordinates)
+  const frameStyle = window.getComputedStyle(frameBox);
+  const frameX = parseFloat(frameStyle.left) || 0;
+  const frameY = parseFloat(frameStyle.top) || 0;
+  const frameWidth = parseFloat(frameStyle.width) || 120;
+  const frameHeight = parseFloat(frameStyle.height) || 120;
+  
+  console.log('Frame position:', { x: frameX, y: frameY, width: frameWidth, height: frameHeight });
+  
   const angle = Math.random() * 2 * Math.PI;
   const distance = 150;
-  const ideaX = frameRect.left + frameRect.width / 2 + Math.cos(angle) * distance;
-  const ideaY = frameRect.top + frameRect.height / 2 + Math.sin(angle) * distance;
+  const ideaX = frameX + frameWidth / 2 + Math.cos(angle) * distance;
+  const ideaY = frameY + frameHeight / 2 + Math.sin(angle) * distance;
+  
+  console.log('Creating idea at:', { x: ideaX, y: ideaY });
+  
   const idea = createIdeaElement(null, `Idea ${document.querySelectorAll('.idea').length + 1}`, ideaX, ideaY);
   document.body.appendChild(idea);
+  console.log('Idea element created and appended:', idea);
+  
   try {
+    const problemId = document.getElementById('problem-id')?.value;
+    if (!problemId) {
+      console.error('Problem ID not found');
+      alert('Error: Problem ID not found. Please refresh the page.');
+      return;
+    }
+    
     const response = await fetch('/api/ideas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '', x: ideaX, y: ideaY })
+      body: JSON.stringify({ content: '', x: ideaX, y: ideaY, problemId: problemId })
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
+    console.log('API response:', data);
+    
     idea.dataset.id = data.id;
     idea.id = `element-${data.id}`;
+    console.log('Set idea ID to:', idea.id);
     Brainstorm.totalPoints = data.totalPoints;
     updatePoints(data.totalPoints);
     
-    // Draw line exactly like defineFrame does - simple and direct
-    drawLine(frameBox, idea, false);
+    // Wait for DOM to fully update, then draw line
+    // Use setTimeout to ensure all layout is complete
+    setTimeout(() => {
+      console.log('=== DRAWING LINE ===');
+      console.log('Frame:', { id: frameBox.id, element: frameBox, exists: !!frameBox.parentElement });
+      console.log('Idea:', { id: idea.id, element: idea, exists: !!idea.parentElement });
+      
+      // Verify elements are in DOM
+      if (!frameBox.parentElement) {
+        console.error('Frame box is not in DOM!');
+        return;
+      }
+      if (!idea.parentElement) {
+        console.error('Idea is not in DOM!');
+        return;
+      }
+      
+      // Get actual positions
+      const frameRect = frameBox.getBoundingClientRect();
+      const ideaRect = idea.getBoundingClientRect();
+      console.log('Frame rect:', frameRect);
+      console.log('Idea rect:', ideaRect);
+      
+      try {
+        drawLine(frameBox, idea, false);
+        console.log('Line drawing completed');
+        
+        // Verify line was created
+        setTimeout(() => {
+          const lines = document.querySelectorAll('.line');
+          console.log('Total lines in DOM:', lines.length);
+          const lastLine = lines[lines.length - 1];
+          if (lastLine) {
+            const lineRect = lastLine.getBoundingClientRect();
+            console.log('Last line created:', {
+              sourceId: lastLine.dataset.sourceId,
+              targetId: lastLine.dataset.targetId,
+              styles: {
+                left: lastLine.style.left,
+                top: lastLine.style.top,
+                width: lastLine.style.width,
+                transform: lastLine.style.transform,
+                position: lastLine.style.position,
+                zIndex: lastLine.style.zIndex
+              },
+              boundingRect: lineRect,
+              isVisible: lineRect.width > 0 && lineRect.height > 0
+            });
+            
+            // Force a repaint
+            lastLine.style.display = 'none';
+            lastLine.offsetHeight; // Trigger reflow
+            lastLine.style.display = 'block';
+          } else {
+            console.error('No line element found in DOM after drawLine call!');
+          }
+        }, 50);
+      } catch (error) {
+        console.error('Error in drawLine:', error);
+        console.error('Error stack:', error.stack);
+      }
+    }, 100);
   } catch (error) {
     console.error('Error adding idea to frame:', error);
+    alert('Error creating idea: ' + error.message);
   }
 }
 
+// Make addIdeaToFrame available globally for onclick handlers
+window.addIdeaToFrame = addIdeaToFrame;
+
 function updateLine(source, target, line) {
-  const sourceRect = source.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-  const sourceCenterX = sourceRect.left + sourceRect.width / 2;
-  const sourceCenterY = sourceRect.top + sourceRect.height / 2;
-  const targetCenterX = targetRect.left + targetRect.width / 2;
-  const targetCenterY = targetRect.top + targetRect.height / 2;
-  const deltaX = targetCenterX - sourceCenterX;
-  const deltaY = targetCenterY - sourceCenterY;
+  console.log('=== updateLine called ===');
+  console.log('Source:', source.id, source);
+  console.log('Target:', target.id, target);
+  console.log('Line element:', line);
+  
+  // Get actual element positions from their style properties (these are document-relative)
+  const sourceStyle = window.getComputedStyle(source);
+  const targetStyle = window.getComputedStyle(target);
+  
+  let sourceX = parseFloat(source.style.left) || parseFloat(sourceStyle.left) || 0;
+  let sourceY = parseFloat(source.style.top) || parseFloat(sourceStyle.top) || 0;
+  let sourceWidth = parseFloat(sourceStyle.width) || 120;
+  let sourceHeight = parseFloat(sourceStyle.height) || 120;
+  
+  let targetX = parseFloat(target.style.left) || parseFloat(targetStyle.left) || 0;
+  let targetY = parseFloat(target.style.top) || parseFloat(targetStyle.top) || 0;
+  let targetWidth = parseFloat(targetStyle.width) || 120;
+  let targetHeight = parseFloat(targetStyle.height) || 120;
+  
+  // If computed style values are "auto" or invalid, try getBoundingClientRect
+  if (isNaN(sourceX) || isNaN(sourceY) || sourceX === 0 || sourceY === 0) {
+    const sourceRect = source.getBoundingClientRect();
+    sourceX = sourceRect.left;
+    sourceY = sourceRect.top;
+    sourceWidth = sourceRect.width;
+    sourceHeight = sourceRect.height;
+    console.log('Using getBoundingClientRect for source:', { x: sourceX, y: sourceY, width: sourceWidth, height: sourceHeight });
+  }
+  
+  if (isNaN(targetX) || isNaN(targetY) || targetX === 0 || targetY === 0) {
+    const targetRect = target.getBoundingClientRect();
+    targetX = targetRect.left;
+    targetY = targetRect.top;
+    targetWidth = targetRect.width;
+    targetHeight = targetRect.height;
+    console.log('Using getBoundingClientRect for target:', { x: targetX, y: targetY, width: targetWidth, height: targetHeight });
+  }
+  
+  // Calculate connection points
+  // For problem statement box, connect from the bottom center (back of the box)
+  // For other elements, connect from center
+  let sourceConnectionX, sourceConnectionY;
+  let targetConnectionX, targetConnectionY;
+  
+  // Use getBoundingClientRect for problem statement to get actual rendered position (accounts for transform)
+  if (source.id === 'problem-statement' || source.classList.contains('problem-statement')) {
+    const sourceRect = source.getBoundingClientRect();
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    
+    // Calculate exact center: midpoint of left/right AND midpoint of top/bottom
+    // This ensures perfect centering both horizontally and vertically
+    const sourceLeft = sourceRect.left + scrollX;
+    const sourceRight = sourceRect.right + scrollX;
+    const sourceTop = sourceRect.top + scrollY;
+    const sourceBottom = sourceRect.bottom + scrollY;
+    
+    // Exact center horizontally: average of left and right edges
+    sourceConnectionX = (sourceLeft + sourceRight) / 2;
+    // Exact center vertically: average of top and bottom edges
+    sourceConnectionY = (sourceTop + sourceBottom) / 2;
+    
+    console.log('Problem statement connection point (exact center):', {
+      rect: { 
+        left: sourceRect.left, 
+        top: sourceRect.top, 
+        right: sourceRect.right,
+        bottom: sourceRect.bottom,
+        width: sourceRect.width, 
+        height: sourceRect.height 
+      },
+      scroll: { x: scrollX, y: scrollY },
+      calculated: {
+        sourceLeft, sourceRight, sourceTop, sourceBottom,
+        centerX: (sourceLeft + sourceRight) / 2,
+        centerY: (sourceTop + sourceBottom) / 2
+      },
+      connection: { x: sourceConnectionX, y: sourceConnectionY }
+    });
+  } else {
+    // Connect from center for other elements
+    sourceConnectionX = sourceX + sourceWidth / 2;
+    sourceConnectionY = sourceY + sourceHeight / 2;
+  }
+  
+  // Always connect to center of target
+  targetConnectionX = targetX + targetWidth / 2;
+  targetConnectionY = targetY + targetHeight / 2;
+  
+  const deltaX = targetConnectionX - sourceConnectionX;
+  const deltaY = targetConnectionY - sourceConnectionY;
   const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
   
-  console.log('Updating line:', {
-    source: source.id,
-    target: target.id,
-    sourceCenter: { x: sourceCenterX, y: sourceCenterY },
-    targetCenter: { x: targetCenterX, y: targetCenterY },
+  console.log('Line calculation:', {
+    sourcePos: { x: sourceX, y: sourceY, width: sourceWidth, height: sourceHeight },
+    targetPos: { x: targetX, y: targetY, width: targetWidth, height: targetHeight },
+    sourceConnection: { x: sourceConnectionX, y: sourceConnectionY },
+    targetConnection: { x: targetConnectionX, y: targetConnectionY },
     distance: distance,
     angle: angle
   });
   
+  // Validate distance
+  if (distance < 1) {
+    console.warn('Distance is too small, line may not be visible');
+    return;
+  }
+  
+  // Set ALL line properties explicitly - sleek black line
+  line.style.position = 'absolute';
+  line.style.left = `${sourceConnectionX}px`;
+  line.style.top = `${sourceConnectionY}px`;
   line.style.width = `${distance}px`;
-  line.style.left = `${sourceCenterX}px`;
-  line.style.top = `${sourceCenterY}px`;
+  line.style.height = '2px';
+  line.style.backgroundColor = '#000000';
   line.style.transform = `rotate(${angle}deg)`;
+  line.style.transformOrigin = '0 0';
+  line.style.zIndex = '5';
+  line.style.display = 'block';
+  line.style.visibility = 'visible';
+  line.style.pointerEvents = 'none';
+  line.style.borderRadius = '1px';
+  line.style.boxShadow = 'none';
+  
+  console.log('Line styles applied:', {
+    position: line.style.position,
+    left: line.style.left,
+    top: line.style.top,
+    width: line.style.width,
+    height: line.style.height,
+    transform: line.style.transform
+  });
+  
+  // Verify line is in DOM and visible
+  if (!document.body.contains(line)) {
+    console.error('Line element is not in DOM!');
+  } else {
+    const lineRect = line.getBoundingClientRect();
+    console.log('Line element is in DOM. Bounding rect:', lineRect);
+    console.log('Line is visible?', lineRect.width > 0 && lineRect.height > 0);
+    if (lineRect.width === 0 || lineRect.height === 0) {
+      console.error('Line has zero dimensions!');
+    }
+  }
 }
 
 function updateButtonPosition(source, target, button) {
-  const sourceRect = source.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-  const sourceCenterX = sourceRect.left + sourceRect.width / 2;
-  const sourceCenterY = sourceRect.top + sourceRect.height / 2;
-  const targetCenterX = targetRect.left + targetRect.width / 2;
-  const targetCenterY = targetRect.top + targetRect.height / 2;
-  const midX = (sourceCenterX + targetCenterX) / 2 - button.offsetWidth / 2;
-  const midY = (sourceCenterY + targetCenterY) / 2 - button.offsetHeight / 2;
+  // Use the same connection point logic as updateLine
+  const sourceStyle = window.getComputedStyle(source);
+  const targetStyle = window.getComputedStyle(target);
+  
+  let sourceX = parseFloat(source.style.left) || parseFloat(sourceStyle.left) || 0;
+  let sourceY = parseFloat(source.style.top) || parseFloat(sourceStyle.top) || 0;
+  let sourceWidth = parseFloat(sourceStyle.width) || 120;
+  let sourceHeight = parseFloat(sourceStyle.height) || 120;
+  
+  let targetX = parseFloat(target.style.left) || parseFloat(targetStyle.left) || 0;
+  let targetY = parseFloat(target.style.top) || parseFloat(targetStyle.top) || 0;
+  let targetWidth = parseFloat(targetStyle.width) || 120;
+  let targetHeight = parseFloat(targetStyle.height) || 120;
+  
+  // Calculate connection points (same as updateLine)
+  let sourceConnectionX, sourceConnectionY;
+  if (source.id === 'problem-statement' || source.classList.contains('problem-statement')) {
+    // Use getBoundingClientRect for problem statement to get actual rendered position
+    const sourceRect = source.getBoundingClientRect();
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    
+    // Exact center: average of left/right AND top/bottom
+    const sourceLeft = sourceRect.left + scrollX;
+    const sourceRight = sourceRect.right + scrollX;
+    const sourceTop = sourceRect.top + scrollY;
+    const sourceBottom = sourceRect.bottom + scrollY;
+    sourceConnectionX = (sourceLeft + sourceRight) / 2;
+    sourceConnectionY = (sourceTop + sourceBottom) / 2;
+  } else {
+    sourceConnectionX = sourceX + sourceWidth / 2;
+    sourceConnectionY = sourceY + sourceHeight / 2;
+  }
+  
+  const targetConnectionX = targetX + targetWidth / 2;
+  const targetConnectionY = targetY + targetHeight / 2;
+  
+  // Position button at the midpoint of the line
+  const midX = (sourceConnectionX + targetConnectionX) / 2 - (button.offsetWidth || 100) / 2;
+  const midY = (sourceConnectionY + targetConnectionY) / 2 - (button.offsetHeight || 30) / 2;
+  
+  button.style.position = 'absolute';
   button.style.left = `${midX}px`;
   button.style.top = `${midY}px`;
 }

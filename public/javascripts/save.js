@@ -58,7 +58,7 @@ function saveBoard() {
     console.log('Problem statement problemId:', problemStatement.problemId);
   
     // Collect connections (lines between elements)
-    const connections = Array.from(document.querySelectorAll('.connection-line'))
+    const connections = Array.from(document.querySelectorAll('.line'))
       .map(line => {
         const sourceId = line.dataset.sourceId || '';
         const targetId = line.dataset.targetId || '';
