@@ -1,0 +1,45 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <div class="col-10 offset-1">
+        <h1 class="text-center mb-4">Add a Custom Problem Statement</h1>
+        
+        <div class="card" style="border: 1px solid #000;">
+            <div class="card-body">
+                <form action="/problem-statement/page3" method="POST" novalidate class="validated-form">
+                    <input type="hidden" name="formId" value="<%= formId %>">
+                    
+                    <div class="mb-4">
+                        <label class="form-label" for="whoHasProblem">
+                            <strong>Who is having this Problem? (Which user group are you targeting)</strong>
+                        </label>
+                        <textarea class="form-control" id="whoHasProblem" name="whoHasProblem" rows="3" required></textarea>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="whatIsProblem">
+                            <strong>What is the problem the user group is facing? (What exactly is the root of the challenge?)</strong>
+                        </label>
+                        <textarea class="form-control" id="whatIsProblem" name="whatIsProblem" rows="4" required></textarea>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="expectedBenefit">
+                            <strong>What should happen if you solve this problem? (What benefit will the user get)</strong>
+                        </label>
+                        <textarea class="form-control" id="expectedBenefit" name="expectedBenefit" rows="4" required></textarea>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">Create Problem Statement</button>
+                        <a href="/problem-statement/page2?formId=<%= formId %>" class="btn btn-outline-secondary btn-lg ms-2">Back to Predefined Problems</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+

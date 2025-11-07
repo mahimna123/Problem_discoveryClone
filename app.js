@@ -29,6 +29,8 @@ const userRoutes = require("./routes/users");
 const problemsRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
 const ideationRoutes = require("./routes/ideation");
+const problemStatementRoutes = require("./routes/problemStatement");
+const adminRoutes = require("./routes/admin");
 const MongoDBStore = require("connect-mongo")(session);
 
 const dbUrl = process.env.DB_URL || "mongodb://127.0.0.1:27017/yelp-camp";
@@ -144,14 +146,42 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 require("./middleware/passport");
 passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// Custom deserialize to ensure isAdmin field is always fresh
+passport.deserializeUser((id, done) => {
+  // Check if id is a valid ObjectId, if not try to find by username
+  // This handles cases where old sessions might have stored username instead of _id
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    // It's a valid ObjectId, use findById
+    User.findById(id)
+      .then(user => {
+        done(null, user);
+      })
+      .catch(err => {
+        done(err, null);
+      });
+  } else {
+    // It's not a valid ObjectId, might be a username - find by username
+    User.findOne({ username: id })
+      .then(user => {
+        if (user) {
+          done(null, user);
+        } else {
+          done(new Error('User not found'), null);
+        }
+      })
+      .catch(err => {
+        done(err, null);
+      });
+  }
+});
 
 app.use((req, res, next) => {
   console.log(req.session);
   console.log(req.user);
-  res.locals.currentUser = req.user;
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
+  // Ensure all variables are always defined (even if null/undefined)
+  res.locals.currentUser = req.user || null;
+  res.locals.success = req.flash("success") || [];
+  res.locals.error = req.flash("error") || [];
   next();
 });
 
@@ -159,6 +189,8 @@ app.use("/", userRoutes);
 app.use("/problems", problemsRoutes);
 app.use("/problems/:id/reviews", reviewRoutes);
 app.use("/", ideationRoutes);
+app.use("/", problemStatementRoutes);
+app.use("/", adminRoutes);
 
 app.get("/", (req, res) => {
   res.render("home");

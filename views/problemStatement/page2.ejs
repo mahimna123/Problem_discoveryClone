@@ -1,0 +1,103 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <div class="col-10 offset-1">
+        <h1 class="text-center mb-4">Add Problem Statement</h1>
+        
+        <div class="card mb-4" style="border: 1px solid #000;">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Select a Pre Defined Problem Statement</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label" for="sdgGoalDisplay">Select an SDG Goal</label>
+                    <input class="form-control" type="text" id="sdgGoalDisplay" value="<%= formData.sdgGoal %>" readonly style="background-color: #f0f0f0;">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="selectedProblem">Select a Problem statement from the given list</label>
+                    <form id="predefinedProblemForm" action="/problem-statement/page2" method="POST">
+                        <input type="hidden" name="formId" value="<%= formId %>">
+                        <select class="form-select" id="selectedProblem" name="selectedProblem" required>
+                            <option value="">Select a problem statement...</option>
+                            <% predefinedProblems.forEach(problem => { %>
+                                <option value="<%= problem._id %>"><%= problem.problemStatement %></option>
+                            <% }); %>
+                        </select>
+                        
+                        <div id="stakeholdersSection" class="mt-3" style="display: none;">
+                            <label class="form-label">Recommended stakeholders to meet</label>
+                            <div id="stakeholdersList" class="d-flex flex-wrap gap-2">
+                                <!-- Stakeholders will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-success me-2">Use This Problem Statement</button>
+                            <a href="/problem-statement/page3?formId=<%= formId %>" class="btn btn-outline-primary">Create Custom Problem Statement Instead</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('selectedProblem').addEventListener('change', async function() {
+    const problemId = this.value;
+    const stakeholdersSection = document.getElementById('stakeholdersSection');
+    const stakeholdersList = document.getElementById('stakeholdersList');
+    
+    if (problemId) {
+        try {
+            const response = await fetch(`/api/predefined-problems/${encodeURIComponent('<%= formData.sdgGoal %>')}`);
+            const problems = await response.json();
+            const selectedProblem = problems.find(p => p._id === problemId);
+            
+            if (selectedProblem && selectedProblem.recommendedStakeholders) {
+                stakeholdersList.innerHTML = '';
+                selectedProblem.recommendedStakeholders.forEach(stakeholder => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn btn-outline-dark btn-sm';
+                    button.textContent = stakeholder;
+                    button.dataset.stakeholder = stakeholder;
+                    button.onclick = function() {
+                        this.classList.toggle('active');
+                        if (this.classList.contains('active')) {
+                            this.classList.remove('btn-outline-dark');
+                            this.classList.add('btn-dark');
+                        } else {
+                            this.classList.remove('btn-dark');
+                            this.classList.add('btn-outline-dark');
+                        }
+                    };
+                    stakeholdersList.appendChild(button);
+                });
+                stakeholdersSection.style.display = 'block';
+            } else {
+                stakeholdersSection.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching stakeholders:', error);
+        }
+    } else {
+        stakeholdersSection.style.display = 'none';
+    }
+});
+
+document.getElementById('predefinedProblemForm').addEventListener('submit', function(e) {
+    const selectedStakeholders = Array.from(document.querySelectorAll('#stakeholdersList .btn.active'))
+        .map(btn => btn.dataset.stakeholder);
+    
+    // Add hidden inputs for selected stakeholders
+    selectedStakeholders.forEach(stakeholder => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'stakeholders';
+        input.value = stakeholder;
+        this.appendChild(input);
+    });
+});
+</script>
+
+
