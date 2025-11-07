@@ -102,9 +102,55 @@ router.get('/problem-statement/page2', isLoggedIn, async (req, res) => {
     }
 
     // Get predefined problems for the selected SDG
-    const predefinedProblems = await PredefinedProblem.find({ 
-      sdgGoal: formData.sdgGoal 
+    // The SDG goal might be stored as "No Poverty" but database has "SDG 1: No Poverty"
+    // Try multiple matching strategies
+    const selectedSdgGoal = formData.sdgGoal;
+    console.log('Looking for problems with SDG Goal:', selectedSdgGoal);
+    
+    // Normalize the search term - remove common words and punctuation
+    const normalizeForSearch = (text) => {
+      return text.toLowerCase()
+        .replace(/[^\w\s]/g, ' ') // Remove punctuation
+        .replace(/\s+/g, ' ')     // Normalize whitespace
+        .trim();
+    };
+    
+    const searchTerm = normalizeForSearch(selectedSdgGoal);
+    console.log('Normalized search term:', searchTerm);
+    
+    // Try exact match first (case-insensitive)
+    let predefinedProblems = await PredefinedProblem.find({ 
+      sdgGoal: { $regex: new RegExp(`^${selectedSdgGoal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
     });
+    
+    // If no exact match, try partial matching with normalized terms
+    if (predefinedProblems.length === 0) {
+      // Extract key words from the search term (remove "SDG", numbers, common words)
+      const keyWords = searchTerm
+        .split(' ')
+        .filter(word => word.length > 2 && !word.match(/^\d+$/))
+        .filter(word => !['sdg', 'goal', 'the', 'and', 'for'].includes(word));
+      
+      if (keyWords.length > 0) {
+        // Match if any key word appears in the SDG goal
+        const regexPattern = keyWords.map(word => `(?=.*${word})`).join('');
+        predefinedProblems = await PredefinedProblem.find({ 
+          sdgGoal: { $regex: regexPattern, $options: 'i' }
+        });
+      }
+    }
+    
+    // If still no match, try simple contains match
+    if (predefinedProblems.length === 0) {
+      predefinedProblems = await PredefinedProblem.find({ 
+        sdgGoal: { $regex: searchTerm, $options: 'i' }
+      });
+    }
+    
+    console.log(`Found ${predefinedProblems.length} problems for SDG: ${selectedSdgGoal}`);
+    if (predefinedProblems.length > 0) {
+      console.log('Sample matched SDG goals:', predefinedProblems.slice(0, 3).map(p => p.sdgGoal));
+    }
 
     res.render('problemStatement/page2', {
       currentUser: req.user,
@@ -140,12 +186,34 @@ router.post('/problem-statement/page2', isLoggedIn, async (req, res) => {
     // Get the predefined problem details
     const predefinedProblem = await PredefinedProblem.findById(selectedProblem);
     
-    // Create the actual problem/campground
+    // Create the actual problem/campground with all team information
     const problem = new Campground({
       title: predefinedProblem ? predefinedProblem.problemStatement : 'Problem Statement',
       description: predefinedProblem ? predefinedProblem.problemStatement : '',
       location: formData.schoolName,
-      author: req.user._id
+      author: req.user._id,
+      // Save all team information
+      teamInfo: {
+        schoolName: formData.schoolName,
+        className: formData.className,
+        groupMembers: formData.groupMembers,
+        groupName: formData.groupName,
+        enrolledProgram: formData.enrolledProgram,
+        sdgGoal: formData.sdgGoal,
+        innovationProcessSteps: formData.innovationProcessSteps,
+        problemDiscoveryMethod: formData.problemDiscoveryMethod,
+        communityChallenges: formData.communityChallenges,
+        fiveYearProblem: formData.fiveYearProblem,
+        technologyApplicationReason: formData.technologyApplicationReason
+      },
+      // Save problem statement information
+      problemStatementInfo: {
+        selectedPredefinedProblem: selectedProblem,
+        recommendedStakeholders: Array.isArray(stakeholders) ? stakeholders : [stakeholders].filter(Boolean),
+        problemType: 'predefined'
+      },
+      // Link to form data
+      formDataId: formData._id
     });
     await problem.save();
 
@@ -209,7 +277,7 @@ router.post('/problem-statement/page3', isLoggedIn, async (req, res) => {
     formData.problemType = 'custom';
     await formData.save();
 
-    // Create the actual problem/campground
+    // Create the actual problem/campground with all team information
     const problemTitle = `${whoHasProblem} - ${whatIsProblem}`;
     const problemDescription = `Problem: ${whatIsProblem}\n\nWho is affected: ${whoHasProblem}\n\nExpected Benefit: ${expectedBenefit}`;
     
@@ -217,7 +285,33 @@ router.post('/problem-statement/page3', isLoggedIn, async (req, res) => {
       title: problemTitle,
       description: problemDescription,
       location: formData.schoolName,
-      author: req.user._id
+      author: req.user._id,
+      // Save all team information
+      teamInfo: {
+        schoolName: formData.schoolName,
+        className: formData.className,
+        groupMembers: formData.groupMembers,
+        groupName: formData.groupName,
+        enrolledProgram: formData.enrolledProgram,
+        sdgGoal: formData.sdgGoal,
+        innovationProcessSteps: formData.innovationProcessSteps,
+        problemDiscoveryMethod: formData.problemDiscoveryMethod,
+        communityChallenges: formData.communityChallenges,
+        fiveYearProblem: formData.fiveYearProblem,
+        technologyApplicationReason: formData.technologyApplicationReason
+      },
+      // Save problem statement information
+      problemStatementInfo: {
+        recommendedStakeholders: [],
+        problemType: 'custom',
+        customProblem: {
+          whoHasProblem: whoHasProblem,
+          whatIsProblem: whatIsProblem,
+          expectedBenefit: expectedBenefit
+        }
+      },
+      // Link to form data
+      formDataId: formData._id
     });
     await problem.save();
 
@@ -239,7 +333,46 @@ router.get('/api/predefined-problems/:sdgGoal', isLoggedIn, async (req, res) => 
   try {
     const { sdgGoal } = req.params;
     const decodedSdgGoal = decodeURIComponent(sdgGoal);
-    const problems = await PredefinedProblem.find({ sdgGoal: decodedSdgGoal });
+    console.log('API: Looking for problems with SDG Goal:', decodedSdgGoal);
+    
+    // Normalize the search term
+    const normalizeForSearch = (text) => {
+      return text.toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+    
+    const searchTerm = normalizeForSearch(decodedSdgGoal);
+    
+    // Try exact match first (case-insensitive)
+    let problems = await PredefinedProblem.find({ 
+      sdgGoal: { $regex: new RegExp(`^${decodedSdgGoal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
+    });
+    
+    // If no exact match, try partial matching with key words
+    if (problems.length === 0) {
+      const keyWords = searchTerm
+        .split(' ')
+        .filter(word => word.length > 2 && !word.match(/^\d+$/))
+        .filter(word => !['sdg', 'goal', 'the', 'and', 'for'].includes(word));
+      
+      if (keyWords.length > 0) {
+        const regexPattern = keyWords.map(word => `(?=.*${word})`).join('');
+        problems = await PredefinedProblem.find({ 
+          sdgGoal: { $regex: regexPattern, $options: 'i' }
+        });
+      }
+    }
+    
+    // If still no match, try simple contains match
+    if (problems.length === 0) {
+      problems = await PredefinedProblem.find({ 
+        sdgGoal: { $regex: searchTerm, $options: 'i' }
+      });
+    }
+    
+    console.log(`API: Found ${problems.length} problems for SDG: ${decodedSdgGoal}`);
     res.json(problems);
   } catch (error) {
     console.error('Error fetching predefined problems:', error);

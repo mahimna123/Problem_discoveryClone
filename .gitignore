@@ -47,3 +47,4 @@ coverage
 .Trashes
 ehthumbs.db
 Thumbs.db.env.backup
+uploads/

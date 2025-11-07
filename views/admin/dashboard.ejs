@@ -24,6 +24,11 @@
                 <i class="fas fa-link"></i> School-Program Enrollments
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="problems-tab" data-bs-toggle="tab" data-bs-target="#problems" type="button" role="tab">
+                <i class="fas fa-lightbulb"></i> Problem Statements (<%= totalProblems || 0 %>)
+            </button>
+        </li>
     </ul>
 
     <!-- Tab Content -->
@@ -289,6 +294,84 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROBLEM STATEMENTS TAB -->
+        <div class="tab-pane fade" id="problems" role="tabpanel">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-upload"></i> Upload Excel File</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="/admin/upload-problems" method="POST" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="excelFile" class="form-label">Select Excel File (.xlsx or .xls)</label>
+                                    <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx,.xls" required>
+                                    <small class="form-text text-muted">
+                                        Excel file should have columns: <strong>SDG Goal</strong>, <strong>Problem Statement</strong>, and optionally <strong>Recommended Stakeholders</strong> (comma-separated)
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="fas fa-upload"></i> Upload and Import
+                                </button>
+                            </form>
+                            
+                            <hr>
+                            
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Excel Format Requirements:</h6>
+                                <small>
+                                    <strong>⚠️ IMPORTANT:</strong> Headers must be in <strong>Row 1</strong> (first row) with no empty rows above!<br><br>
+                                    <strong>Column A:</strong> SDG Goal (e.g., "No Poverty", "Zero Hunger")<br>
+                                    <strong>Column B:</strong> Problem Statement<br>
+                                    <strong>Column C:</strong> Recommended Stakeholder 1 (optional)<br>
+                                    <strong>Column D:</strong> Recommended Stakeholder 2 (optional)<br>
+                                    <strong>Column E:</strong> Recommended Stakeholder 3 (optional)<br>
+                                    <br>
+                                    <strong>If exporting from Numbers:</strong><br>
+                                    1. Delete the metadata row ("This document was exported from Numbers...")<br>
+                                    2. Make sure headers are in Row 1<br>
+                                    3. Export as Excel (.xlsx) format<br>
+                                    <br>
+                                    <em>Note: Column names are flexible - the system will recognize columns containing "SDG", "Goal", "Problem", "Statement", "Stakeholder"</em>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">All Problem Statements (<%= totalProblems || 0 %>)</h5>
+                        </div>
+                        <div class="card-body">
+                            <% if (problemSummary && problemSummary.length > 0) { %>
+                                <div class="mb-3">
+                                    <h6>Summary by SDG Goal:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <% problemSummary.forEach(item => { %>
+                                            <span class="badge bg-secondary">
+                                                <%= item._id %>: <%= item.count %>
+                                            </span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Problem statements are displayed on Page 2 of Problem Discovery based on the selected SDG Goal.
+                            </div>
+                            
+                            <p class="text-muted">
+                                To view all problem statements, use the API endpoint: <code>/admin/problems</code>
+                            </p>
                         </div>
                     </div>
                 </div>

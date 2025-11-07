@@ -12,9 +12,12 @@ module.exports.renderDashboard = async (req, res) => {
         console.log('Rendering dashboard for user:', req.user._id);
         const campgrounds = await Campground.find({ author: req.user._id })
             .populate('author')
-            .populate('reviews');
+            .populate('reviews')
+            .populate('teamInfo.enrolledProgram')
+            .populate('problemStatementInfo.selectedPredefinedProblem')
+            .sort({ createdAt: -1 }); // Show newest first
         console.log('Found campgrounds:', campgrounds.length);
-        res.render('users/dashboard', { campgrounds });
+        res.render('users/dashboard', { campgrounds, currentUser: req.user });
     } catch (error) {
         console.error('Error rendering dashboard:', error);
         req.flash('error', 'Error loading dashboard');

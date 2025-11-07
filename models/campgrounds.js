@@ -20,11 +20,11 @@ const campgroundSchema = new Schema ({
         type: {
             type: String,
             enum: ['Point'],
-            required: true
+            required: false
         },
         coordinates: {
             type: [Number],
-            required: true
+            required: false
         }
     },
     problem: String,
@@ -47,7 +47,43 @@ const campgroundSchema = new Schema ({
             type: Schema.Types.ObjectId,
             ref: 'Review'
         }
-    ]
+    ],
+    // Team and form data from Excite and Enrol
+    teamInfo: {
+        schoolName: String,
+        className: String,
+        groupMembers: String,
+        groupName: String,
+        enrolledProgram: {
+            type: Schema.Types.ObjectId,
+            ref: 'Program'
+        },
+        sdgGoal: String,
+        innovationProcessSteps: String,
+        problemDiscoveryMethod: String,
+        communityChallenges: String,
+        fiveYearProblem: String,
+        technologyApplicationReason: String
+    },
+    // Problem statement data
+    problemStatementInfo: {
+        selectedPredefinedProblem: {
+            type: Schema.Types.ObjectId,
+            ref: 'PredefinedProblem'
+        },
+        recommendedStakeholders: [String],
+        problemType: { type: String, enum: ['predefined', 'custom'] },
+        customProblem: {
+            whoHasProblem: String,
+            whatIsProblem: String,
+            expectedBenefit: String
+        }
+    },
+    // Reference to form data
+    formDataId: {
+        type: Schema.Types.ObjectId,
+        ref: 'ProblemFormData'
+    }
 }, opts);
 
 campgroundSchema.virtual('properties.popUpMarkup').get(function(){
