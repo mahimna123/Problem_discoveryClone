@@ -33,12 +33,13 @@ const connectionSchema = new mongoose.Schema({
   targetId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true }
+  username: { type: String, required: true },
+  problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campground', required: true }
 });
 
 const solutionSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  detail: { type: String, required: true },
+  detail: { type: String, default: '' }, // Optional - will be filled by AI
   shouldDo: { type: String, required: true },
   shouldNotDo: { type: String, required: true },
   keyFeatures: [{

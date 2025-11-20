@@ -48,3 +48,4 @@ coverage
 ehthumbs.db
 Thumbs.db.env.backup
 uploads/
+.env.backup

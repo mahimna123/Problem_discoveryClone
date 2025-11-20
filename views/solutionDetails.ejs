@@ -103,10 +103,49 @@
                 <a href="/dashboard" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
-                <a href="/ideation/define-solution?campgroundId=<%= campgroundId %>" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Edit Solution
-                </a>
+                <div>
+                    <% if (!hasAIDetail) { %>
+                        <button type="button" class="btn btn-primary me-2" id="askAISolutionBtn">
+                            <i class="fas fa-robot"></i> Ask AI Solution
+                        </button>
+                    <% } %>
+                    <a href="/define-solution?campgroundId=<%= campgroundId %>" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Solution
+                    </a>
+                </div>
             </div>
+            
+            <% if (!hasAIDetail) { %>
+            <script>
+            document.getElementById('askAISolutionBtn').addEventListener('click', async function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Asking AI...';
+                
+                try {
+                    const response = await fetch('/api/deepseek', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ campgroundId: '<%= campgroundId %>' })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'An error occurred while processing your solution with AI.');
+                    }
+                    
+                    // Reload the page to show AI response
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message || 'An error occurred while processing your solution with AI.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-robot"></i> Ask AI Solution';
+                }
+            });
+            </script>
+            <% } %>
         </div>
     </div>
 </div>

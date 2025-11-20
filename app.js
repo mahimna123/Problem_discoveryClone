@@ -31,6 +31,7 @@ const reviewRoutes = require("./routes/reviews");
 const ideationRoutes = require("./routes/ideation");
 const problemStatementRoutes = require("./routes/problemStatement");
 const adminRoutes = require("./routes/admin");
+const programAdministratorRoutes = require("./routes/programAdministrator");
 const MongoDBStore = require("connect-mongo")(session);
 
 const dbUrl = process.env.DB_URL || "mongodb://127.0.0.1:27017/yelp-camp";
@@ -191,6 +192,7 @@ app.use("/problems/:id/reviews", reviewRoutes);
 app.use("/", ideationRoutes);
 app.use("/", problemStatementRoutes);
 app.use("/", adminRoutes);
+app.use("/", programAdministratorRoutes);
 
 app.get("/", (req, res) => {
   res.render("home");

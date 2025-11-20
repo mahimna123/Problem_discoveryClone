@@ -52,7 +52,11 @@
         <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
       </a>
       <button class="btn btn-primary add-idea-button">Add Idea</button>
-      <a href="/ideation/my-brainstorms" class="btn btn-info text-white">View My Brainstorms</a>
+      <% if (problem && problem._id) { %>
+        <a href="/ideation/my-brainstorms?problemId=<%= problem._id %>" class="btn btn-info text-white">View My Brainstorms</a>
+      <% } else { %>
+        <a href="/ideation/my-brainstorms" class="btn btn-info text-white">View My Brainstorms</a>
+      <% } %>
       <button class="btn btn-success save-button">Save</button>
     </div>
 

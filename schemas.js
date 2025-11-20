@@ -27,11 +27,23 @@
     
     module.exports.campgroundSchema = Joi.object({
         campground: Joi.object({
-            title: Joi.string().required().escapeHTML(),
-            location: Joi.string().required().escapeHTML(),
-            description: Joi.string().required().escapeHTML()
-        }).required(),
-        deleteImages: Joi.array()
+            title: Joi.string().optional().allow('').escapeHTML(),
+            location: Joi.string().optional().allow('').escapeHTML(),
+            description: Joi.string().optional().allow('').escapeHTML()
+        }).optional(),
+        teamInfo: Joi.object({
+            schoolName: Joi.string().optional().allow(''),
+            className: Joi.string().optional().allow(''),
+            groupMembers: Joi.string().optional().allow(''),
+            groupName: Joi.string().optional().allow(''),
+            enrolledProgram: Joi.string().optional().allow(''),
+            sdgGoal: Joi.string().optional().allow(''),
+            problemDiscoveryMethod: Joi.string().optional().allow(''),
+            communityChallenges: Joi.string().optional().allow(''),
+            fiveYearProblem: Joi.string().optional().allow(''),
+            technologyApplicationReason: Joi.string().optional().allow('')
+        }).optional(),
+        deleteImages: Joi.array().optional()
     });
     
     module.exports.reviewSchema = Joi.object({

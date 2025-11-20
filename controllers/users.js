@@ -15,6 +15,7 @@ module.exports.renderDashboard = async (req, res) => {
             .populate('reviews')
             .populate('teamInfo.enrolledProgram')
             .populate('problemStatementInfo.selectedPredefinedProblem')
+            .populate('solution')
             .sort({ createdAt: -1 }); // Show newest first
         console.log('Found campgrounds:', campgrounds.length);
         res.render('users/dashboard', { campgrounds, currentUser: req.user });

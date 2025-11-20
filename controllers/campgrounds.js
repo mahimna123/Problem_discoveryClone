@@ -2,6 +2,7 @@ const Campground = require('../models/campgrounds');
 const { cloudinary } = require("../cloudinary");
 const multer = require('multer');
 const maptilerClient = require("@maptiler/client");
+const { Program, School } = require('../models/schemas');
 maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
 module.exports.index = async (req, res) => {
@@ -56,12 +57,42 @@ module.exports.renderNewForm = (req, res) => {
   }
 
   module.exports.renderEditForm = async(req, res) => {
-    const campground = await Campground.findById(req.params.id)
+    const SDG_GOALS = [
+      { number: 1, title: 'No Poverty', description: 'End poverty in all its forms everywhere' },
+      { number: 2, title: 'Zero Hunger', description: 'End hunger, achieve food security and improved nutrition' },
+      { number: 3, title: 'Good Health and Well-being', description: 'Ensure healthy lives and promote well-being for all' },
+      { number: 4, title: 'Quality Education', description: 'Ensure inclusive and equitable quality education' },
+      { number: 5, title: 'Gender Equality', description: 'Achieve gender equality and empower all women and girls' },
+      { number: 6, title: 'Clean Water and Sanitation', description: 'Ensure availability and sustainable management of water' },
+      { number: 7, title: 'Affordable and Clean Energy', description: 'Ensure access to affordable, reliable, sustainable energy' },
+      { number: 8, title: 'Decent Work and Economic Growth', description: 'Promote sustained, inclusive economic growth' },
+      { number: 9, title: 'Industry, Innovation and Infrastructure', description: 'Build resilient infrastructure, promote innovation' },
+      { number: 10, title: 'Reduced Inequalities', description: 'Reduce inequality within and among countries' },
+      { number: 11, title: 'Sustainable Cities and Communities', description: 'Make cities and human settlements inclusive, safe, resilient' },
+      { number: 12, title: 'Responsible Consumption and Production', description: 'Ensure sustainable consumption and production patterns' },
+      { number: 13, title: 'Climate Action', description: 'Take urgent action to combat climate change and its impacts' },
+      { number: 14, title: 'Life Below Water', description: 'Conserve and sustainably use the oceans, seas and marine resources' },
+      { number: 15, title: 'Life on Land', description: 'Protect, restore and promote sustainable use of terrestrial ecosystems' },
+      { number: 16, title: 'Peace, Justice and Strong Institutions', description: 'Promote peaceful and inclusive societies' },
+      { number: 17, title: 'Partnerships for the Goals', description: 'Strengthen the means of implementation and revitalize partnerships' },
+      { number: 18, title: 'Women and Welfare', description: 'Promote women\'s welfare and empowerment' }
+    ];
+
+    const campground = await Campground.findById(req.params.id).populate('teamInfo.enrolledProgram');
     if(!campground){
-      req.flash('error', 'Cannot find that campground');
-     return res.redirect('/campgrounds')
-  }
-    res.render('campgrounds/edit', { campground });
+      req.flash('error', 'Cannot find that problem statement');
+      return res.redirect('/problems')
+    }
+    
+    const programs = await Program.find({ isActive: true }).sort({ name: 1 });
+    const schools = await School.find({ isActive: true }).sort({ name: 1 });
+    
+    res.render('campgrounds/edit', { 
+      campground,
+      programs,
+      schools,
+      sdgGoals: SDG_GOALS
+    });
   }
 
 //   module.exports.updateCampground = async(req, res) => {
@@ -71,21 +102,72 @@ module.exports.renderNewForm = (req, res) => {
 
   module.exports.updateCampground = async (req, res) => {
     const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id,{ ...req.body.campground });
-    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
-    campground.geometry = geoData.features[0].geometry;
-    const imgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
-    campground.images.push(...imgs);
+    const campground = await Campground.findById(id);
+    
+    if (!campground) {
+      req.flash('error', 'Problem statement not found');
+      return res.redirect('/problems');
+    }
+
+    // Update basic campground fields
+    campground.title = req.body.campground.title;
+    campground.description = req.body.campground.description;
+    campground.location = req.body.campground.location;
+
+    // Update team info if provided
+    if (req.body.teamInfo) {
+      if (!campground.teamInfo) {
+        campground.teamInfo = {};
+      }
+      campground.teamInfo.schoolName = req.body.teamInfo.schoolName;
+      campground.teamInfo.className = req.body.teamInfo.className;
+      campground.teamInfo.groupMembers = req.body.teamInfo.groupMembers;
+      campground.teamInfo.groupName = req.body.teamInfo.groupName;
+      campground.teamInfo.enrolledProgram = req.body.teamInfo.enrolledProgram;
+      if (req.body.teamInfo.sdgGoal) {
+        campground.teamInfo.sdgGoal = req.body.teamInfo.sdgGoal;
+      }
+      if (req.body.teamInfo.problemDiscoveryMethod) {
+        campground.teamInfo.problemDiscoveryMethod = req.body.teamInfo.problemDiscoveryMethod;
+      }
+      if (req.body.teamInfo.communityChallenges) {
+        campground.teamInfo.communityChallenges = req.body.teamInfo.communityChallenges;
+      }
+      if (req.body.teamInfo.fiveYearProblem) {
+        campground.teamInfo.fiveYearProblem = req.body.teamInfo.fiveYearProblem;
+      }
+      if (req.body.teamInfo.technologyApplicationReason) {
+        campground.teamInfo.technologyApplicationReason = req.body.teamInfo.technologyApplicationReason;
+      }
+    }
+
+    // Update geometry based on location
+    try {
+      const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+      if (geoData.features && geoData.features.length > 0) {
+        campground.geometry = geoData.features[0].geometry;
+      }
+    } catch (error) {
+      console.error('Error geocoding location:', error);
+    }
+
+    // Handle new images
+    if (req.files && req.files.length > 0) {
+      const imgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
+      campground.images.push(...imgs);
+    }
+
+    // Handle image deletion
     if (req.body.deleteImages) {
       for(let filename of req.body.deleteImages){
         await cloudinary.uploader.destroy(filename);
       }
-    await campground.updateOne({ $pull: {images: {filename: { $in: req.body.deleteImages } } } } )
-    console.log(campground)
-  }
+      await campground.updateOne({ $pull: {images: {filename: { $in: req.body.deleteImages } } } } );
+    }
+
     await campground.save();
-    req.flash('success', 'Problem updated');
-    res.redirect(`/problems/${campground._id}`)
+    req.flash('success', 'Problem statement updated successfully');
+    res.redirect(`/problems/${campground._id}`);
   }
 
   module.exports.deleteCampground = async(req, res) =>{

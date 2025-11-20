@@ -16,7 +16,12 @@ class Brainstorm {
 
   async getIdeas(userId, problemId) {
     try {
-      return await Idea.find({ user: userId, problemId: problemId });
+      // Only return ideas that match both user and problemId
+      // MongoDB will automatically exclude items where problemId is null/undefined when matching against an ObjectId
+      return await Idea.find({ 
+        user: userId, 
+        problemId: problemId
+      });
     } catch (error) {
       console.error('Error getting ideas:', error);
       throw new Error('Failed to retrieve ideas');
@@ -45,7 +50,12 @@ class Brainstorm {
 
   async getFrames(userId, problemId) {
     try {
-      return await Frame.find({ user: userId, problemId: problemId });
+      // Only return frames that match both user and problemId
+      // MongoDB will automatically exclude items where problemId is null/undefined when matching against an ObjectId
+      return await Frame.find({ 
+        user: userId, 
+        problemId: problemId
+      });
     } catch (error) {
       console.error('Error getting frames:', error);
       throw new Error('Failed to retrieve frames');
@@ -103,23 +113,59 @@ class Brainstorm {
     }
   }
 
-  async addConnection(sourceId, targetId, user) {
+  async addConnection(sourceId, targetId, user, problemId) {
     const connection = new Connection({
       sourceId,
       targetId,
       user: user._id,
       username: user.username || user.email,
+      problemId: problemId
     });
     await connection.save();
     return connection;
   }
 
-  async getConnections(userId) {
+  async getConnections(userId, problemId) {
     try {
-      return await Connection.find({ user: userId });
+      // Only return connections that match both user and problemId
+      // MongoDB will automatically exclude items where problemId is null/undefined when matching against an ObjectId
+      return await Connection.find({ 
+        user: userId, 
+        problemId: problemId
+      });
     } catch (error) {
       console.error('Error getting connections:', error);
       throw new Error('Failed to retrieve connections');
+    }
+  }
+
+  async deleteConnectionsForProblem(userId, problemId) {
+    try {
+      const result = await Connection.deleteMany({ user: userId, problemId: problemId });
+      return result.deletedCount;
+    } catch (error) {
+      console.error('Error deleting connections:', error);
+      throw new Error('Failed to delete connections');
+    }
+  }
+
+  async deleteIdeasForProblem(userId, problemId) {
+    try {
+      const result = await Idea.deleteMany({ user: userId, problemId: problemId });
+      return result.deletedCount;
+    } catch (error) {
+      console.error('Error deleting ideas:', error);
+      throw new Error('Failed to delete ideas');
+    }
+  }
+
+  async deleteFramesForProblem(userId, problemId) {
+    try {
+      const result = await Frame.deleteMany({ user: userId, problemId: problemId });
+      return result.deletedCount;
+    } catch (error) {
+      console.error('Error deleting frames:', error);
+      throw new Error('Failed to delete frames');
     }
   }
 

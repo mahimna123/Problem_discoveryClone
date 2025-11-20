@@ -34,3 +34,5 @@ If you get an error saying columns are not found:
 2. Make sure column names contain the keywords: "SDG", "Goal", "Problem", "Statement"
 3. Check the server console logs for detailed debugging information
 
+
+

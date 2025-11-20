@@ -45,7 +45,7 @@ async function loadData() {
       return;
     }
     
-    const [ideas, frames] = await Promise.all([
+    const [ideas, frames, connections] = await Promise.all([
       fetch(`/api/ideas?problemId=${problemId}`).then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
@@ -53,10 +53,29 @@ async function loadData() {
       fetch(`/api/frames?problemId=${problemId}`).then(res => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
+      }),
+      fetch(`/api/connections?problemId=${problemId}`).then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
       })
     ]);
+    
+    // Create ideas and frames first
     ideas.forEach(idea => createIdeaElement(idea._id, idea.content, idea.x, idea.y));
     frames.forEach(frame => createFrameBox(frame._id, frame.content, frame.x, frame.y));
+    
+    // Wait a bit for DOM to update, then restore connections
+    setTimeout(() => {
+      connections.forEach(conn => {
+        const source = document.getElementById(conn.sourceId);
+        const target = document.getElementById(conn.targetId);
+        if (source && target) {
+          drawLine(source, target, false);
+        }
+      });
+      console.log(`Restored ${connections.length} connections`);
+    }, 100);
+    
     updatePoints(Brainstorm.totalPoints || 0);
     console.log('Data loaded successfully');
   } catch (error) {

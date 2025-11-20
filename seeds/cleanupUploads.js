@@ -36,3 +36,5 @@ files.forEach(file => {
 
 console.log(`\nCleanup complete: ${deleted} file(s) deleted, ${kept} file(s) kept.`);
 
+
+
