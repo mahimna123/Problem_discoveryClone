@@ -93,10 +93,16 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  // Construct absolute callback URL
+  // Use GOOGLE_CALLBACK_URL if set, otherwise construct from BASE_URL
+  const absoluteCallback = process.env.GOOGLE_CALLBACK_URL || (
+    (process.env.BASE_URL || 'http://localhost:3000') + '/auth/google/callback'
+  );
+  console.log('🔐 Google OAuth Callback URL:', absoluteCallback);
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
+    callbackURL: absoluteCallback
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
