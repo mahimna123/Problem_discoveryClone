@@ -4,9 +4,16 @@ const User = require('../models/user');
 
 // Only set up Google OAuth if credentials are provided
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const absoluteCallback = process.env.GOOGLE_CALLBACK_URL || (
-        (process.env.BASE_URL || 'http://localhost:3000') + '/auth/google/callback'
-    );
+    // Construct absolute callback URL
+    // Force HTTPS for production domains
+    let baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    
+    // Force HTTPS for production if BASE_URL contains the domain
+    if (baseUrl.includes('erehwonorbitshift.org') && !baseUrl.startsWith('https://')) {
+        baseUrl = baseUrl.replace('http://', 'https://');
+    }
+    
+    const absoluteCallback = process.env.GOOGLE_CALLBACK_URL || (baseUrl + '/auth/google/callback');
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,

@@ -95,9 +95,15 @@ passport.use(new LocalStrategy(User.authenticate()));
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   // Construct absolute callback URL
   // Use GOOGLE_CALLBACK_URL if set, otherwise construct from BASE_URL
-  const absoluteCallback = process.env.GOOGLE_CALLBACK_URL || (
-    (process.env.BASE_URL || 'http://localhost:3000') + '/auth/google/callback'
-  );
+  // If BASE_URL is not set, try to detect from request (for production)
+  let baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  
+  // Force HTTPS for production if BASE_URL contains the domain
+  if (baseUrl.includes('erehwonorbitshift.org') && !baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.replace('http://', 'https://');
+  }
+  
+  const absoluteCallback = process.env.GOOGLE_CALLBACK_URL || (baseUrl + '/auth/google/callback');
   console.log('🔐 Google OAuth Callback URL:', absoluteCallback);
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
