@@ -9,38 +9,41 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/problems">All Problems</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/excite-and-enrol">Excite and Enrol</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/excite-and-enrol">Problem Discovery</a>
-          </li>
+          <% if (currentUser && currentUser.isAdmin) { %>
+          <!-- Admin users only see Home and Build -->
           <li class="nav-item">
             <a class="nav-link" href="https://orbitshift.frappe.cloud/lms/courses?">Build</a>
           </li>
-
+          <% } else if (currentUser && !currentUser.isAdmin) { %>
+          <!-- Non-admin logged-in users -->
+          <li class="nav-item">
+            <a class="nav-link" href="https://orbitshift.frappe.cloud/lms/courses?">Build</a>
+          </li>
+          <% } else { %>
+          <!-- Logged-out users see Build only -->
+          <li class="nav-item">
+            <a class="nav-link" href="https://orbitshift.frappe.cloud/lms/courses?">Build</a>
+          </li>
+          <% } %>
         </ul>
         <div> 
           <div class="navbar-nav ml-auto">
-            <% if (typeof currentUser === 'undefined' || currentUser === null) { %>
-            <a class="nav-link" href="/login">Login</a>
-            <a class="nav-link" href="/register">Register</a>
-            <% } else { %>
-            <a class="nav-link" href="/dashboard">
-              <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            <% if (currentUser && currentUser.isAdmin) { %>
+            <% if (currentUser) { %>
+            <% if (currentUser.isAdmin) { %>
+            <!-- Admin users see Admin button and Logout -->
             <a class="nav-link" href="/admin/dashboard">
               <i class="fas fa-user-shield"></i> Admin
             </a>
-            <a class="nav-link" href="/program-administrator">
-              <i class="fas fa-chart-line"></i> Program Administrator
+            <a class="nav-link" href="/logout">Logout</a>
+            <% } else { %>
+            <!-- Non-admin users see Dashboard (only if completed Excite & Enrol) and Logout -->
+            <% if (hasCompletedExciteEnrol) { %>
+            <a class="nav-link" href="/dashboard">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <% } %>
             <a class="nav-link" href="/logout">Logout</a>
+            <% } %>
             <% } %>
           </div>
         </div>

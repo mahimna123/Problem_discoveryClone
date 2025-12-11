@@ -142,9 +142,11 @@ router.post('/admin/programs', isLoggedIn, isAdmin, async (req, res) => {
   }
 });
 
-// Update program
-router.put('/admin/programs/:id', isLoggedIn, isAdmin, async (req, res) => {
+// Update program - handle both PUT (via method-override) and POST
+const updateProgram = async (req, res) => {
   try {
+    console.log('Update program route hit:', req.method, req.path, req.params.id);
+    console.log('Request body:', req.body);
     const { name, description, isActive } = req.body;
     const program = await Program.findByIdAndUpdate(
       req.params.id,
@@ -157,7 +159,8 @@ router.put('/admin/programs/:id', isLoggedIn, isAdmin, async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!program) {
-      return res.status(404).json({ error: 'Program not found' });
+      req.flash('error', 'Program not found.');
+      return res.redirect('/admin/dashboard');
     }
     req.flash('success', 'Program updated successfully!');
     res.redirect('/admin/dashboard');
@@ -166,6 +169,15 @@ router.put('/admin/programs/:id', isLoggedIn, isAdmin, async (req, res) => {
     req.flash('error', 'Failed to update program.');
     res.redirect('/admin/dashboard');
   }
+};
+
+router.put('/admin/programs/:id', isLoggedIn, isAdmin, updateProgram);
+router.post('/admin/programs/:id', isLoggedIn, isAdmin, (req, res, next) => {
+  // Check if _method is PUT, if so handle as PUT
+  if (req.body._method === 'PUT') {
+    return updateProgram(req, res, next);
+  }
+  next(); // Otherwise continue to next route
 });
 
 // Delete program

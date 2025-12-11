@@ -2,6 +2,8 @@ const User = require('../models/user');
 const Campground = require('../models/campgrounds');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../utils/email');
+const { getProblemStage } = require('../utils/stageHelper');
+const Idea = require('../models/schemas').Idea;
 
 module.exports.renderRegister = (req, res) => {
     res.render('users/register');
@@ -16,9 +18,59 @@ module.exports.renderDashboard = async (req, res) => {
             .populate('teamInfo.enrolledProgram')
             .populate('problemStatementInfo.selectedPredefinedProblem')
             .populate('solution')
+            .populate('prototype')
+            .lean() // Use lean to get plain objects with all fields
             .sort({ createdAt: -1 }); // Show newest first
-        console.log('Found campgrounds:', campgrounds.length);
-        res.render('users/dashboard', { campgrounds, currentUser: req.user });
+        
+        // Add stage information and idea counts to each campground
+        const campgroundsWithStage = await Promise.all(campgrounds.map(async (campground) => {
+            // Count ideas for ideation progress
+            let ideaCount = 0;
+            try {
+                ideaCount = await Idea.countDocuments({ problemId: campground._id });
+            } catch (err) {
+                ideaCount = 0;
+            }
+            
+            // Get stage info with ideaCount
+            // Ensure prototype is properly populated with files
+            let campForStage = campground;
+            if (campground.prototype) {
+              if (typeof campground.prototype === 'object' && campground.prototype._id) {
+                // Prototype is populated, check if it has files
+                // With .lean(), files should be accessible directly
+                if (!campground.prototype.files || !Array.isArray(campground.prototype.files) || campground.prototype.files.length === 0) {
+                  // Files not populated or empty, fetch prototype separately
+                  const { Prototype } = require('../models/schemas');
+                  const proto = await Prototype.findById(campground.prototype._id);
+                  if (proto) {
+                    campForStage = { ...campground };
+                    campForStage.prototype = proto.toObject ? proto.toObject() : proto;
+                  }
+                }
+              } else {
+                // Prototype is just an ID, we need to fetch it
+                const { Prototype } = require('../models/schemas');
+                const proto = await Prototype.findById(campground.prototype);
+                if (proto) {
+                  campForStage = { ...campground };
+                  campForStage.prototype = proto.toObject ? proto.toObject() : proto;
+                }
+              }
+            }
+            const stageInfo = getProblemStage(campForStage, ideaCount);
+            const campObj = { ...campground }; // Create a copy to avoid mutating the original
+            campObj.currentStage = stageInfo.name;
+            campObj.stageNumber = stageInfo.stage;
+            campObj.progress = stageInfo.progress;
+            campObj.ideaCount = ideaCount;
+            campObj.stageProgress = stageInfo.stageProgress;
+            
+            return campObj;
+        }));
+        
+        console.log('Found campgrounds:', campgroundsWithStage.length);
+        res.render('users/dashboard', { campgrounds: campgroundsWithStage, currentUser: req.user });
     } catch (error) {
         console.error('Error rendering dashboard:', error);
         req.flash('error', 'Error loading dashboard');
@@ -34,7 +86,7 @@ module.exports.register = async(req, res) => {
         req.login(registeredUser, err => {
             if(err) return next(err);
             req.flash('success','Welcome to Problem Discovery Platform');
-            res.redirect('/dashboard');
+            res.redirect('/');
         })
     }catch(e){
         req.flash('error', e.message);
@@ -48,9 +100,9 @@ module.exports.renderLogin = (req, res) =>{
 
 module.exports.login = (req, res) => {
     req.flash('success', 'Welcome back!');
-    const redirectUrl = res.locals.returnTo || '/dashboard';
+    // Always redirect to home page after login
     delete req.session.returnTo;
-    res.redirect(redirectUrl);
+    res.redirect('/');
 }
 
 module.exports.logout = (req, res, next) => {
@@ -59,16 +111,16 @@ module.exports.logout = (req, res, next) => {
             return next(err);
         }
         req.flash('success', 'Goodbye!');
-        res.redirect('/problems');
+        res.redirect('/');
     });
 }
 
 // Google OAuth callback
 module.exports.googleCallback = (req, res) => {
     req.flash('success', 'Welcome! You have successfully logged in with Google.');
-    const redirectUrl = res.locals.returnTo || '/dashboard';
+    // Always redirect to home page after login
     delete req.session.returnTo;
-    res.redirect(redirectUrl);
+    res.redirect('/');
 }
 
 // Forgot password - render form

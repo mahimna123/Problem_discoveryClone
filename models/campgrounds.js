@@ -11,7 +11,7 @@ ImageSchema.virtual('thumbnail').get(function(){
    return this.url.replace('/upload', '/upload/w_200');
 });
 
-const opts = { toJSON: { virtuals: true } };
+const opts = { toJSON: { virtuals: true }, strictPopulate: false };
 
 const campgroundSchema = new Schema ({
     title: String,
@@ -41,6 +41,10 @@ const campgroundSchema = new Schema ({
     solution: {
         type: Schema.Types.ObjectId,
         ref: 'Solution'
+    },
+    prototype: {
+        type: Schema.Types.ObjectId,
+        ref: 'Prototype'
     },
     reviews: [
         {
@@ -83,6 +87,11 @@ const campgroundSchema = new Schema ({
     formDataId: {
         type: Schema.Types.ObjectId,
         ref: 'ProblemFormData'
+    },
+    // Notes field
+    notes: {
+        type: String,
+        default: ''
     }
 }, opts);
 

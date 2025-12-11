@@ -53,6 +53,23 @@ const solutionSchema = new mongoose.Schema({
   username: { type: String, required: true }
 });
 
+const prototypeSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, default: '' },
+  files: [{
+    url: { type: String, required: true },
+    filename: { type: String, required: true },
+    fileType: { type: String }, // image, video, document, etc.
+    uploadedAt: { type: Date, default: Date.now }
+  }],
+  notes: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  username: { type: String, required: true },
+  problemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Campground', required: true }
+});
+
 // Schema for multi-page problem statement form data
 const problemFormDataSchema = new mongoose.Schema({
   // Page 1 Data
@@ -146,6 +163,7 @@ const Frame = mongoose.model('Frame', frameSchema);
 const ProblemStatement = mongoose.model('ProblemStatement', problemStatementSchema);
 const Connection = mongoose.model('Connection', connectionSchema);
 const Solution = mongoose.model('Solution', solutionSchema);
+const Prototype = mongoose.model('Prototype', prototypeSchema);
 const ProblemFormData = mongoose.model('ProblemFormData', problemFormDataSchema);
 const SDGGoal = mongoose.model('SDGGoal', sdgGoalSchema);
 const PredefinedProblem = mongoose.model('PredefinedProblem', predefinedProblemSchema);
@@ -154,7 +172,7 @@ const School = mongoose.model('School', schoolSchema);
 const SchoolProgram = mongoose.model('SchoolProgram', schoolProgramSchema);
 
 module.exports = { 
-  Idea, Frame, ProblemStatement, Connection, Solution, 
+  Idea, Frame, ProblemStatement, Connection, Solution, Prototype,
   ProblemFormData, SDGGoal, PredefinedProblem,
   Program, School, SchoolProgram
 };

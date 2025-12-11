@@ -31,28 +31,45 @@ function calculateLevel(problemCount, ideationCount, solutionCount) {
 
 /**
  * Get dashboard data for program administrator
+ * Can accept program ID from route parameter or query string
  */
 module.exports.getDashboard = async (req, res) => {
   try {
-    // Find ABPS Group of schools program
-    const program = await Program.findOne({ name: 'ABPS Group of schools' });
+    // Get program ID from route parameter or query string
+    const programId = req.params.programId || req.query.programId;
+    
+    let program;
+    if (programId) {
+      // Find program by ID
+      program = await Program.findById(programId);
+    } else {
+      // Fallback: Find ABPS Group of schools program (for backward compatibility)
+      program = await Program.findOne({ name: 'ABPS Group of schools' });
+    }
     
     if (!program) {
-      req.flash('error', 'ABPS Group of schools program not found. Please create it first in the admin dashboard.');
-      return res.redirect('/admin/dashboard');
+      req.flash('error', programId ? 'Program not found.' : 'ABPS Group of schools program not found. Please create it first in the admin dashboard.');
+      return res.redirect('/');
     }
 
-    // Get all schools enrolled in ABPS Schools program
+    // Get all schools enrolled in this program
     const schoolPrograms = await SchoolProgram.find({ 
       program: program._id,
       isActive: true 
     }).populate('school');
 
     const schoolsData = [];
+    const addedSchoolIds = new Set(); // Track added schools to prevent duplicates
 
     for (const schoolProgram of schoolPrograms) {
       const school = schoolProgram.school;
       if (!school) continue;
+      
+      // Skip if this school was already added (prevent duplicates)
+      if (addedSchoolIds.has(school._id.toString())) {
+        continue;
+      }
+      addedSchoolIds.add(school._id.toString());
 
       // Get all problem statements for this school in this program
       const problems = await Campground.find({
@@ -114,6 +131,114 @@ module.exports.getDashboard = async (req, res) => {
     console.error('Error loading program administrator dashboard:', error);
     req.flash('error', 'Error loading program administrator dashboard.');
     res.redirect('/dashboard');
+  }
+};
+
+/**
+ * Get all problem statements for a school
+ */
+module.exports.getSchoolProblems = async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    
+    // Find ABPS Group of schools program
+    const program = await Program.findOne({ name: 'ABPS Group of schools' });
+    if (!program) {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+
+    // Get school name
+    const school = await School.findById(schoolId);
+    if (!school) {
+      return res.status(404).json({ error: 'School not found' });
+    }
+
+    // Get all problem statements for this school in this program
+    const problems = await Campground.find({
+      'teamInfo.schoolName': school.name,
+      'teamInfo.enrolledProgram': program._id
+    })
+    .populate('author', 'username email')
+    .sort({ createdAt: -1 });
+
+    res.json({
+      schoolName: school.name,
+      problems: problems.map(p => ({
+        _id: p._id,
+        title: p.title,
+        description: p.description,
+        location: p.location,
+        createdAt: p.createdAt,
+        author: p.author ? {
+          username: p.author.username,
+          email: p.author.email
+        } : null,
+        teamInfo: p.teamInfo || {}
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching school problems:', error);
+    res.status(500).json({ error: 'Failed to fetch school problems' });
+  }
+};
+
+/**
+ * Get all solutions for a school
+ */
+module.exports.getSchoolSolutions = async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    
+    // Find ABPS Group of schools program
+    const program = await Program.findOne({ name: 'ABPS Group of schools' });
+    if (!program) {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+
+    // Get school name
+    const school = await School.findById(schoolId);
+    if (!school) {
+      return res.status(404).json({ error: 'School not found' });
+    }
+
+    // Get all problems for this school
+    const problems = await Campground.find({
+      'teamInfo.schoolName': school.name,
+      'teamInfo.enrolledProgram': program._id,
+      solution: { $exists: true, $ne: null }
+    })
+    .populate('solution')
+    .populate('author', 'username email')
+    .sort({ createdAt: -1 });
+
+    const solutions = problems
+      .filter(p => p.solution)
+      .map(p => ({
+        _id: p.solution._id,
+        title: p.solution.title,
+        detail: p.solution.detail,
+        shouldDo: p.solution.shouldDo,
+        shouldNotDo: p.solution.shouldNotDo,
+        keyFeatures: p.solution.keyFeatures,
+        implementationSteps: p.solution.implementationSteps,
+        createdAt: p.solution.createdAt,
+        problem: {
+          _id: p._id,
+          title: p.title,
+          description: p.description
+        },
+        author: p.solution.user ? {
+          username: p.solution.username
+        } : null
+      }));
+
+    res.json({
+      schoolName: school.name,
+      solutions: solutions
+    });
+  } catch (error) {
+    console.error('Error fetching school solutions:', error);
+    res.status(500).json({ error: 'Failed to fetch school solutions' });
   }
 };
 

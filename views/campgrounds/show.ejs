@@ -1,139 +1,890 @@
 <% layout('layouts/boilerplate')%>
 <link rel="stylesheet" href="/stylesheets/stars.css">
-<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 
-<div class="row">
-    <div class="col-6">
-        <div id="map" style="width: 100%; height: 400px; margin-bottom: 20px; border: 1px solid #ccc; position: relative;"></div>
-        <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                <% campground.images.forEach((img, i) => {  %>
-                <div class="carousel-item <%= i === 0 ? 'active' : ''%>">
-                    <img crossorigin="anonymous" src="<%= img.url%>" class="d-block w-100" alt="">
-                </div>
-                <% }) %>
+<style>
+/* Project Detail Page Styles */
+.project-detail-page {
+    background: #0a0a0a;
+    min-height: 100vh;
+    color: #fff;
+    padding: 0;
+}
+
+.project-header {
+    padding: 20px 0;
+    border-bottom: 1px solid #2a2a2a;
+    margin-bottom: 30px;
+}
+
+.project-title-section h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.project-title-section p {
+    color: #888;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+
+/* Phase Navigation */
+.phase-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    position: relative;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
+.phase-navigation::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #2a2a2a;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.phase-item-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    z-index: 1;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.phase-item-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.phase-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.phase-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    background: #1a1a1a;
+    border: 2px solid #333;
+}
+
+.phase-item.active .phase-icon {
+    background: #ffde00;
+    border-color: #ffde00;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 222, 0, 0.4);
+}
+
+.phase-item.completed .phase-icon {
+    background: #ffde00;
+    border-color: #ffde00;
+    color: #000;
+}
+
+.phase-item:hover .phase-icon {
+    border-color: #ffde00;
+    transform: scale(1.05);
+}
+
+.phase-name {
+    font-size: 0.85rem;
+    color: #888;
+    text-align: center;
+    max-width: 100px;
+}
+
+.phase-item.active .phase-name {
+    color: #ffde00;
+    font-weight: 600;
+}
+
+.phase-item.completed .phase-name {
+    color: #ffde00;
+}
+
+/* Main Content Layout */
+.content-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+/* Phase Detail Card */
+.phase-detail-card {
+    background: #111;
+    border-radius: 16px;
+    padding: 30px;
+    border: 1px solid #2a2a2a;
+}
+
+.phase-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.phase-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #ffde00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+}
+
+.phase-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.phase-description {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.phase-instructions {
+    background: #3d380d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-left: 4px solid #ffde00;
+}
+
+.phase-instructions p {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Problem Info Card */
+.problem-info-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.problem-info-card h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.problem-info-card h3 i {
+    color: #ffde00;
+}
+
+.problem-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.meta-item i {
+    color: #ffde00;
+}
+
+/* Content Tabs */
+.content-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 15px;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #888;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover, .tab-btn.active {
+    background: #1a1a1a;
+    border-color: #ffde00;
+    color: #fff;
+}
+
+.tab-btn.active {
+    background: #ffde00;
+    color: #000;
+    border-color: #ffde00;
+}
+
+.tab-content {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 30px;
+    min-height: 200px;
+    text-align: center;
+    color: #666;
+}
+
+.empty-state {
+    padding: 40px;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.add-btn {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-btn:hover {
+    background: #ffde00;
+    color: #000;
+    border-color: #ffde00;
+}
+
+/* Sidebar */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-card {
+    background: #111;
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid #2a2a2a;
+}
+
+.sidebar-card h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Phase Activities */
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background: #222;
+}
+
+.activity-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #444;
+    border-radius: 4px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all 0.3s ease;
+}
+
+.activity-item.completed .activity-checkbox {
+    background: #ffde00;
+    border-color: #ffde00;
+    color: #000;
+}
+
+.activity-name {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Resources */
+.add-resource-btn {
+    width: 100%;
+    padding: 15px;
+    background: transparent;
+    border: 1px dashed #444;
+    border-radius: 8px;
+    color: #888;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.add-resource-btn:hover {
+    border-color: #ffde00;
+    color: #ffde00;
+}
+
+.resource-hint {
+    color: #555;
+    font-size: 0.8rem;
+    margin-top: 10px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.action-btn.primary {
+    background: #ffde00;
+    color: #000;
+}
+
+.action-btn.primary:hover {
+    background: #e6c800;
+    transform: translateY(-2px);
+}
+
+.action-btn.secondary {
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.action-btn.secondary:hover {
+    border-color: #ffde00;
+    color: #ffde00;
+}
+
+.action-btn.success {
+    background: #ffde00;
+    color: #000;
+}
+
+.action-btn.success:hover {
+    background: #e6c800;
+}
+
+.action-btn.danger {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.action-btn.danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Reviews Section */
+.reviews-section {
+    margin-top: 30px;
+}
+
+.reviews-section h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reviews-section h3 i {
+    color: #ffde00;
+}
+
+.review-form {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.review-form textarea {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.review-form textarea:focus {
+    outline: none;
+    border-color: #ffde00;
+}
+
+.review-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #2a2a2a;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.review-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffde00, #ffed4e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 600;
+}
+
+.author-name {
+    color: #fff;
+    font-weight: 500;
+}
+
+.review-rating {
+    color: #ffde00;
+}
+
+.review-body {
+    color: #aaa;
+    line-height: 1.6;
+}
+
+/* Image Gallery */
+.image-gallery {
+    margin-bottom: 25px;
+}
+
+.gallery-main {
+    width: 100%;
+    height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-placeholder i {
+    font-size: 4rem;
+    color: #ffde00;
+}
+
+/* Solution Preview */
+.solution-preview-card {
+    background: #3d380d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #ffde00;
+}
+
+.solution-preview-card h4 {
+    color: #ffde00;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .content-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .phase-navigation {
+        overflow-x: auto;
+        padding: 20px 10px;
+    }
+    
+    .phase-name {
+        font-size: 0.75rem;
+    }
+}
+</style>
+
+<%
+// Check which phases are actually completed
+let phaseCompleted = {
+    1: false, // Excite & Enrol
+    2: false, // Problem Discovery
+    3: false, // Ideation
+    4: false, // Conceptual Solution
+    5: false  // Prototyping
+};
+
+// Phase 1: Excite & Enrol - Check if teamInfo exists
+if (campground.teamInfo && campground.teamInfo.schoolName) {
+    phaseCompleted[1] = true;
+}
+
+// Phase 2: Problem Discovery - Check if problemStatementInfo exists
+if (campground.problemStatementInfo && campground.problemStatementInfo.problemType) {
+    phaseCompleted[2] = true;
+}
+
+// Phase 3: Ideation - Check if 10+ ideas exist (ideaCount passed from controller)
+if (typeof ideaCount !== 'undefined' && ideaCount >= 10) {
+    phaseCompleted[3] = true;
+}
+
+// Phase 4: Conceptual Solution - Check if solution exists
+if (campground.solution) {
+    phaseCompleted[4] = true;
+}
+
+// Phase 5: Prototyping - Check if prototype exists and has files
+if (typeof prototypeHasFiles !== 'undefined' && prototypeHasFiles) {
+    phaseCompleted[5] = true;
+}
+
+// Determine current stage (first incomplete phase, or 5 if all complete)
+let currentStage = 1;
+for (let i = 1; i <= 5; i++) {
+    if (!phaseCompleted[i]) {
+        currentStage = i;
+        break;
+    }
+    if (i === 5 && phaseCompleted[5]) {
+        currentStage = 5;
+    }
+}
+
+const phases = [
+    { name: 'Excite & Enrol', icon: 'fas fa-users', description: 'Build your team and get enrolled' },
+    { name: 'Problem Discovery', icon: 'fas fa-search', description: 'Research and understand the problem' },
+    { name: 'Ideation', icon: 'fas fa-lightbulb', description: 'Generate creative solutions' },
+    { name: 'Conceptual Solution', icon: 'fas fa-tasks', description: 'Define and refine your solution' },
+    { name: 'Prototyping', icon: 'fas fa-tools', description: 'Build and test your prototype' }
+];
+%>
+
+<div class="project-detail-page">
+    <div class="container py-4">
+        <!-- Project Header -->
+        <div class="project-header">
+            <div class="project-title-section">
+                <h1><%= campground.title %></h1>
+                <p><%= campground.description || 'Innovation project for solving real-world problems' %></p>
             </div>
-            <% if(campground.images.length > 1) {%>
-            <a class="carousel-control-prev" href="#campgroundCarousel" role="button" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#campgroundCarousel" role="button" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-            <% } %>
         </div>
 
-        <div class="card mb-3">
-            <div class="row">
-                <div class="col-md-4">
-                    <img class="img-fluid" alt="" src="<%= campground.image %>">
-                </div>
-                <div class="col-md-8">
-                    <div class="card-body">
-                        <h5 class="card-title"><%= campground.title %></h5>
-                        <p class="card-text"><%= campground.description %></p>
-                        <p class="card-text">
-                            <small class="text-muted">
-                                <%= campground.location %>
-                            </small>
+        <!-- Phase Navigation -->
+        <div class="phase-navigation">
+            <% phases.forEach((phase, index) => { 
+                const phaseNum = index + 1;
+                const isCompleted = phaseCompleted[phaseNum];
+                const isActive = phaseNum === currentStage;
+                
+                // Determine route for each phase
+                let phaseRoute = '#';
+                if (phaseNum === 1) {
+                    // Excite & Enrol - go to Excite & Enrol form
+                    phaseRoute = `/excite-and-enrol?campgroundId=${campground._id}`;
+                } else if (phaseNum === 2) {
+                    // Problem Discovery - go to Problem Discovery page
+                    phaseRoute = `/problem-statement/page2?campgroundId=${campground._id}`;
+                } else if (phaseNum === 3) {
+                    // Ideation
+                    phaseRoute = `/ideation/${campground._id}`;
+                } else if (phaseNum === 4) {
+                    // Conceptual Solution
+                    phaseRoute = `/define-solution?campgroundId=${campground._id}`;
+                } else if (phaseNum === 5) {
+                    // Prototyping
+                    phaseRoute = `/prototyping/${campground._id}`;
+                }
+            %>
+                <a href="<%= phaseRoute %>" class="phase-item-link" style="text-decoration: none; color: inherit;">
+                    <div class="phase-item <%= isCompleted ? 'completed' : '' %> <%= isActive ? 'active' : '' %>">
+                        <div class="phase-icon">
+                            <% if (isCompleted) { %>
+                                <i class="fas fa-check"></i>
+                            <% } else { %>
+                                <i class="<%= phase.icon %>"></i>
+                            <% } %>
+                        </div>
+                        <span class="phase-name"><%= phase.name %></span>
+                    </div>
+                </a>
+            <% }); %>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-layout">
+            <!-- Left Column - Phase Details -->
+            <div class="main-content">
+                <div class="phase-detail-card">
+                    <!-- Current Phase Header -->
+                    <div class="phase-header">
+                        <div class="phase-header-icon">
+                            <i class="<%= phases[currentStage - 1].icon %>"></i>
+                        </div>
+                        <h2><%= phases[currentStage - 1].name %></h2>
+                    </div>
+                    
+                    <p class="phase-description"><%= phases[currentStage - 1].description %></p>
+                    
+                    <div class="phase-instructions">
+                        <p>
+                            <% if (currentStage === 1) { %>
+                                Complete team enrollment and understand the innovation process. Gather your team members and prepare for the problem discovery phase.
+                            <% } else if (currentStage === 2) { %>
+                                Conduct user interviews, observations, and research to build empathy with your users. Understand the root cause of the problem.
+                            <% } else if (currentStage === 3) { %>
+                                Generate creative ideas and brainstorm solutions. Think outside the box and explore multiple approaches to solving the problem.
+                            <% } else if (currentStage === 4) { %>
+                                Define your solution concept clearly. Document what your solution should and shouldn't do, and outline key features.
+                            <% } else { %>
+                                Build a prototype of your solution. Test it with real users and iterate based on feedback.
+                            <% } %>
                         </p>
-                        <% if(currentUser && (campground.author && campground.author.equals(currentUser._id) || currentUser.isAdmin)) { %>
-                            <div class="d-flex gap-2">
-                                <a class="btn btn-success" href="/ideation/<%= campground._id %>">
-                                    <i class="fas fa-lightbulb"></i> Create Ideas
-                                </a>
-                                <a class="btn btn-primary" href="/define-solution?campgroundId=<%= campground._id %>">
-                                    <i class="fas fa-tasks"></i> Define Solution
-                                </a>
-                                <a class="btn btn-info" href="/ideation/my-brainstorms?problemId=<%= campground._id %>">
-                                    <i class="fas fa-brain"></i> My Brainstorms
-                                </a>
-                            </div>
+                    </div>
+
+                    <!-- Problem Info -->
+                    <div class="problem-info-card">
+                        <h3><i class="fas fa-info-circle"></i> Problem Details</h3>
+                        
+                        <div class="problem-meta">
+                            <% if (campground.teamInfo && campground.teamInfo.schoolName) { %>
+                                <div class="meta-item">
+                                    <i class="fas fa-school"></i>
+                                    <span><%= campground.teamInfo.schoolName %></span>
+                                </div>
+                            <% } %>
+                            <% if (campground.teamInfo && campground.teamInfo.groupName) { %>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span><%= campground.teamInfo.groupName %></span>
+                                </div>
+                            <% } %>
+                            <% if (campground.teamInfo && campground.teamInfo.sdgGoal) { %>
+                                <div class="meta-item">
+                                    <i class="fas fa-bullseye"></i>
+                                    <span><%= campground.teamInfo.sdgGoal %></span>
+                                </div>
+                            <% } %>
+                            <% if (campground.location) { %>
+                                <div class="meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><%= campground.location %></span>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <% if (campground.problem) { %>
+                            <p style="color: #aaa; font-size: 0.9rem; line-height: 1.6; margin-top: 16px;">
+                                <%= campground.problem %>
+                            </p>
                         <% } %>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <% if(campground.solution) { %>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Solution</h5>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <a href="/solution-details?title=<%= encodeURIComponent(campground.solution.title) %>&detail=<%= encodeURIComponent(campground.solution.detail) %>&shouldDo=<%= encodeURIComponent(campground.solution.shouldDo) %>&shouldNotDo=<%= encodeURIComponent(campground.solution.shouldNotDo) %>&keyFeatures=<%= encodeURIComponent(JSON.stringify(campground.solution.keyFeatures)) %>&implementationSteps=<%= encodeURIComponent(campground.solution.implementationSteps) %>&campgroundId=<%= campground._id %>" class="btn btn-info">
-                            <i class="fas fa-eye"></i> See Solution
-                        </a>
+                    <!-- Images Section - Moved above Notes -->
+                    <div class="images-section" style="background: #1a1a1a; border-radius: 12px; padding: 30px; margin-top: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: #fff; margin: 0; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-images" style="color: #ffde00;"></i> Problem Images
+                            </h3>
+                            <% if (currentUser && (campground.author && campground.author.equals(currentUser._id) || currentUser.isAdmin)) { %>
+                                <!-- Image Upload Form - Compact version next to title -->
+                                <form action="/problems/<%= campground._id %>/images" method="POST" enctype="multipart/form-data" style="display: flex; align-items: center; gap: 10px;">
+                                    <input class="form-control" type="file" id="image" name="image" multiple accept="image/*" style="background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; width: auto;">
+                                    <button type="submit" class="action-btn primary" style="background: #ffde00; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; white-space: nowrap;">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                        
+                        <% if (campground.images && campground.images.length > 0) { %>
+                            <div class="images-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+<% campground.images.forEach((img, i) => { %>
+                                    <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #2a2a2a;">
+                                        <img src="<%= img.url %>" alt="Problem image" style="width: 100%; height: 200px; object-fit: cover;">
+                                        <% if (currentUser && (campground.author && campground.author.equals(currentUser._id) || currentUser.isAdmin)) { %>
+                                            <form action="/problems/<%= campground._id %>/images/<%= img.filename %>?_method=DELETE" method="POST" style="position: absolute; top: 8px; right: 8px;">
+                                                <button type="submit" onclick="return confirm('Are you sure you want to delete this image?')" style="background: rgba(220, 53, 69, 0.9); color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } else { %>
+                            <p style="color: #888; margin-bottom: 20px;">No images uploaded yet.</p>
+                        <% } %>
                     </div>
-                    <div class="solution-preview" style="max-width: 100%; overflow-x: auto;">
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Component</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Technical Components</td>
-                                        <td style="white-space: pre-wrap;"><%= campground.solution.detail %></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Key Features</td>
-                                        <td style="white-space: pre-wrap;">
-                                            <% if(campground.solution.keyFeatures && campground.solution.keyFeatures.length > 0) { %>
-                                                <% campground.solution.keyFeatures.forEach(function(feature) { %>
-                                                    <div class="mb-2">
-                                                        <strong>Feature:</strong> <%= feature.feature %><br>
-                                                        <strong>Format:</strong> <%= feature.format %><br>
-                                                        <strong>Usage:</strong> <%= feature.usage %>
-                                                    </div>
-                                                <% }); %>
-                                            <% } else { %>
-                                                No key features specified
-                                            <% } %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Implementation Steps</td>
-                                        <td style="white-space: pre-wrap;"><%= campground.solution.implementationSteps %></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                    <!-- Notes Section - Below Images -->
+                    <div class="tab-content" id="tab-notes" style="display: block;">
+                        <div class="notes-section" style="background: #1a1a1a; border-radius: 12px; padding: 30px; margin-top: 25px;">
+                            <h3 style="color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-sticky-note" style="color: #ffde00;"></i> Notes
+                            </h3>
+                            <form action="/problems/<%= campground._id %>/notes" method="POST" id="notesForm">
+                                <textarea name="notes" class="form-control" rows="8" style="background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 8px; width: 100%; margin-bottom: 16px; font-family: inherit; resize: vertical;" placeholder="Add your notes here..."><%= campground.notes || '' %></textarea>
+                                <button type="submit" class="action-btn primary" style="background: #ffde00; color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-save"></i> Save Notes
+                                </button>
+                            </form>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Solution Preview if exists -->
+                    <% if (campground.solution) { %>
+                        <div class="solution-preview-card">
+                            <h4><i class="fas fa-check-circle"></i> Solution Defined</h4>
+                            <p style="color: #aaa; margin-bottom: 15px;"><%= campground.solution.title || 'Your conceptual solution has been defined.' %></p>
+                            <a href="/solution-details?campgroundId=<%= campground._id %>" class="action-btn success">
+                                <i class="fas fa-eye"></i> View Full Solution
+                            </a>
             </div>
         <% } %>
 
-        <% if(currentUser && (campground.author && campground.author.equals(currentUser._id) || currentUser.isAdmin)) { %>
-            <div class="card-body">
-                <a class="btn btn-warning" href="/problems/<%= campground._id %>/edit">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <% if(currentUser.isAdmin) { %>
-                    <span class="badge bg-info ms-2">Admin Edit</span>
-                <% } %>
-                <form class="d-inline" action="/problems/<%= campground._id %>?_method=DELETE" method="POST">
-                    <button class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this problem statement?')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </form>
-            </div>
-        <% } %>
-        <div class="card-footer text-muted">
-            2 days ago
-        </div>
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="/ideation/my-brainstorms?problemId=<%= campground._id %>" class="action-btn secondary">
+                            <i class="fas fa-brain"></i> View My Brainstorm
+                        </a>
+                        <% if (campground.solution) { %>
+                            <a href="/solution-details?campgroundId=<%= campground._id %>" class="action-btn success">
+                                <i class="fas fa-eye"></i> View My Solution
+                            </a>
+                        <% } %>
+                        <% if (currentUser && (campground.author && campground.author.equals(currentUser._id) || currentUser.isAdmin)) { %>
+                            <a href="/problems/<%= campground._id %>/edit" class="action-btn secondary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form class="d-inline" action="/problems/<%= campground._id %>?_method=DELETE" method="POST">
+                                <button type="submit" class="action-btn danger" onclick="return confirm('Are you sure you want to delete this problem statement?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
     </div>
-    <div class="col-6">
-        <% if(currentUser){ %>
-        <h2>Leave a Review</h2>
-        <form action="/problems/<%=campground._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
-            <fieldset class="starability-basic">
-                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
-                    aria-label="No rating." />
+
+                <!-- Reviews Section -->
+                <div class="reviews-section">
+                    <h3><i class="fas fa-comments"></i> Reviews & Feedback (<%= campground.reviews ? campground.reviews.length : 0 %>)</h3>
+                    
+                    <% if (currentUser) { %>
+                        <div class="review-form">
+                            <form action="/problems/<%= campground._id %>/reviews" method="POST" class="validated-form" novalidate>
+                                <fieldset class="starability-basic mb-3">
+                                    <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
                 <input type="radio" id="first-rate1" name="review[rating]" value="1" />
                 <label for="first-rate1" title="Terrible">1 star</label>
                 <input type="radio" id="first-rate2" name="review[rating]" value="2" />
@@ -145,39 +896,166 @@
                 <input type="radio" id="first-rate5" name="review[rating]" value="5" />
                 <label for="first-rate5" title="Amazing">5 stars</label>
             </fieldset>
-            <div class="mb-3">
-                <label class="form-label" for="body">Review Text</label>
-                <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
-                <div class="valid-feedback">
-                    Looks good!
+                                <textarea name="review[body]" placeholder="Share your thoughts and feedback..." required></textarea>
+                                <button type="submit" class="action-btn primary mt-3">
+                                    <i class="fas fa-paper-plane"></i> Submit Review
+                                </button>
+                            </form>
+                        </div>
+                    <% } %>
+
+                    <% if (campground.reviews && campground.reviews.length > 0) { %>
+                        <% campground.reviews.forEach(review => { %>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="review-author">
+                                        <div class="author-avatar">
+                                            <%= review.author.username.charAt(0).toUpperCase() %>
+                                        </div>
+                                        <span class="author-name"><%= review.author.username %></span>
+                                    </div>
+                                    <div class="review-rating">
+                                        <% for (let i = 1; i <= 5; i++) { %>
+                                            <i class="fas fa-star <%= i <= review.rating ? '' : 'text-muted' %>"></i>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <p class="review-body"><%= review.body %></p>
+                                <% if (currentUser && review.author.equals(currentUser._id)) { %>
+                                    <form action="/problems/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mt-2">
+                                        <button type="submit" class="action-btn danger" style="padding: 6px 12px; font-size: 0.8rem;">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="review-card">
+                            <p style="color: #666; text-align: center; padding: 20px;">No reviews yet. Be the first to share your feedback!</p>
+                        </div>
+                    <% } %>
                 </div>
             </div>
-            <button class="btn btn-success">Submit</button>
-        </form>
+
+            <!-- Right Sidebar -->
+            <div class="sidebar">
+                <!-- Phase Activities -->
+                <div class="sidebar-card">
+                    <h3>Phase Activities</h3>
+                    <% if (currentStage === 1) { %>
+                        <div class="activity-item completed">
+                            <div class="activity-checkbox"><i class="fas fa-check"></i></div>
+                            <span class="activity-name">Team Registration</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Program Enrollment</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Orientation</span>
+                        </div>
+                    <% } else if (currentStage === 2) { %>
+                        <div class="activity-item completed">
+                            <div class="activity-checkbox"><i class="fas fa-check"></i></div>
+                            <span class="activity-name">User Interviews</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Observations</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Research</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Surveys</span>
+                        </div>
+                    <% } else if (currentStage === 3) { %>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Brainstorming Session</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Mind Mapping</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Idea Evaluation</span>
+                        </div>
+                    <% } else if (currentStage === 4) { %>
+                        <div class="activity-item <%= campground.solution ? 'completed' : '' %>">
+                            <div class="activity-checkbox"><% if (campground.solution) { %><i class="fas fa-check"></i><% } %></div>
+                            <span class="activity-name">Define Solution</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Feature Specification</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">User Journey Mapping</span>
+                        </div>
+                    <% } else { %>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Build Prototype</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">User Testing</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-checkbox"></div>
+                            <span class="activity-name">Iterate & Improve</span>
+                        </div>
         <% } %>
-        <% for(let review of campground.reviews) { %>
-        <div class="card mb-3 ">
-            <div class="card-body">
-                <h5 class="card-title"> <%= review.author.username%></h5>
-                <p class="starability-result" data-rating="<%=review.rating%>">
-                    Rated: <%= review.rating %> stars
-                </p>
-                <p class="card-text">Review: <%= review.body %></p>
-                <%  if( currentUser && review.author.equals(currentUser._id))  {%>
-                <form action="/problems/<%=campground._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </form>
-                <% } %>
+                </div>
+
+
+                <!-- Quick Stats -->
+                <div class="sidebar-card">
+                    <h3>Project Stats</h3>
+                    <div class="activity-item">
+                        <div class="activity-checkbox" style="background: #ffde00; border-color: #ffde00;">
+                            <i class="fas fa-comments" style="color: #000;"></i>
+                        </div>
+                        <span class="activity-name"><%= campground.reviews ? campground.reviews.length : 0 %> Reviews</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-checkbox" style="background: #ffde00; border-color: #ffde00;">
+                            <i class="fas fa-check" style="color: #000;"></i>
+                        </div>
+                        <span class="activity-name">Phase <%= currentStage %> of 5</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <% } %>
     </div>
 </div>
-</body>
 
-<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script>
-    window.maptilerApiKey = '4btAbygczgbYb0GwBLJm';
-    window.campground = <%- JSON.stringify(mapData) %>;
+// Tab switching functionality
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+    });
+});
+
+// Activity item click
+document.querySelectorAll('.activity-item').forEach(item => {
+    item.addEventListener('click', function() {
+        this.classList.toggle('completed');
+        const checkbox = this.querySelector('.activity-checkbox');
+        if (this.classList.contains('completed')) {
+            checkbox.innerHTML = '<i class="fas fa-check"></i>';
+        } else {
+            checkbox.innerHTML = '';
+        }
+    });
+});
 </script>
-<script src="/javascripts/showPageMap.js"></script>

@@ -35,11 +35,36 @@ module.exports.renderNewForm = (req, res) => {
         path: 'author'
       }
     }).populate('author')
-    .populate('solution');
+    .populate('solution')
+    .populate('prototype')
+    .select('+notes'); // Explicitly include notes field
     
     if(!campground){
         req.flash('error', 'Problem not found');
         return res.redirect('/problems')
+    }
+
+    // Count ideas for ideation phase completion check
+    const Idea = require('../models/schemas').Idea;
+    let ideaCount = 0;
+    try {
+      ideaCount = await Idea.countDocuments({ problemId: campground._id });
+    } catch (err) {
+      console.error('Error counting ideas:', err);
+    }
+
+    // Check if prototype has files
+    let prototypeHasFiles = false;
+    if (campground.prototype) {
+      try {
+        const { Prototype } = require('../models/schemas');
+        const prototype = await Prototype.findById(campground.prototype);
+        if (prototype && prototype.files && prototype.files.length > 0) {
+          prototypeHasFiles = true;
+        }
+      } catch (err) {
+        console.error('Error checking prototype files:', err);
+      }
     }
 
     // Create a simplified version of the campground for the map
@@ -53,7 +78,13 @@ module.exports.renderNewForm = (req, res) => {
         }
     };
 
-    res.render('campgrounds/show', { campground, mapData });
+    // Refresh campground to ensure notes are loaded
+    const refreshedCampground = await Campground.findById(req.params.id);
+    if (refreshedCampground && refreshedCampground.notes) {
+      campground.notes = refreshedCampground.notes;
+    }
+    
+    res.render('campgrounds/show', { campground, mapData, ideaCount, prototypeHasFiles });
   }
 
   module.exports.renderEditForm = async(req, res) => {
@@ -153,7 +184,19 @@ module.exports.renderNewForm = (req, res) => {
 
     // Handle new images
     if (req.files && req.files.length > 0) {
-      const imgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
+      const imgs = req.files.map(f => {
+        // Check if Cloudinary (has secure_url or path is URL) or disk storage
+        let url;
+        if (f.secure_url || f.url || (f.path && f.path.startsWith('http'))) {
+          url = f.secure_url || f.url || f.path;
+        } else {
+          // Disk storage - create URL path
+          const path = require('path');
+          const filename = path.basename(f.path);
+          url = `/uploads/${filename}`;
+        }
+        return { url: url, filename: f.filename || f.originalname };
+      });
       campground.images.push(...imgs);
     }
 

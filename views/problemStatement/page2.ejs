@@ -15,11 +15,15 @@
                 <div class="mb-3">
                     <label class="form-label" for="selectedProblem">Select a Problem statement from the given list</label>
                     <form id="predefinedProblemForm" action="/problem-statement/page2" method="POST">
-                        <input type="hidden" name="formId" value="<%= formId %>">
+                        <% if (campgroundId) { %>
+                            <input type="hidden" name="campgroundId" value="<%= campgroundId %>">
+                        <% } else if (formId) { %>
+                            <input type="hidden" name="formId" value="<%= formId %>">
+                        <% } %>
                         <select class="form-select" id="selectedProblem" name="selectedProblem" required>
                             <option value="">Select a problem statement...</option>
                             <% predefinedProblems.forEach(problem => { %>
-                                <option value="<%= problem._id %>"><%= problem.problemStatement %></option>
+                                <option value="<%= problem._id %>" <%= (campground && campground.problemStatementInfo && campground.problemStatementInfo.selectedPredefinedProblem && campground.problemStatementInfo.selectedPredefinedProblem.toString() === problem._id.toString()) ? 'selected' : '' %>><%= problem.problemStatement %></option>
                             <% }); %>
                         </select>
                         

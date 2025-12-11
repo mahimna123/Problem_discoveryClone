@@ -3,7 +3,7 @@
     <!-- Title -->
     <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="display-4 fw-bold mb-0">ABPS Dashboard</h1>
+            <h1 class="display-4 fw-bold mb-0"><%= program.name %> Dashboard</h1>
         </div>
     </div>
 
@@ -64,11 +64,36 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
+        height: 100%;
     }
 
     .school-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Level 1 - Reddish Shade - Apply to entire card */
+    .school-card[data-level="1"] {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    /* Level 2 - Orangish Yellow - Apply to entire card */
+    .school-card[data-level="2"] {
+        background: linear-gradient(135deg, #ffa500 0%, #ffd700 100%);
+        color: white;
+    }
+
+    /* Level 3 - Greenish Yellow - Apply to entire card */
+    .school-card[data-level="3"] {
+        background: linear-gradient(135deg, #90ee90 0%, #adff2f 100%);
+        color: white;
+    }
+
+    /* No Level - Gray - Apply to entire card */
+    .school-card[data-level="0"] {
+        background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+        color: white;
     }
 
     .school-card-content {
@@ -78,30 +103,7 @@
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-    }
-
-    /* Level 1 - Reddish Shade */
-    .school-card[data-level="1"] .school-card-content {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
-    }
-
-    /* Level 2 - Orangish Yellow */
-    .school-card[data-level="2"] .school-card-content {
-        background: linear-gradient(135deg, #ffa500 0%, #ffd700 100%);
-        color: white;
-    }
-
-    /* Level 3 - Greenish Yellow */
-    .school-card[data-level="3"] .school-card-content {
-        background: linear-gradient(135deg, #90ee90 0%, #adff2f 100%);
-        color: white;
-    }
-
-    /* No Level - Gray */
-    .school-card[data-level="0"] .school-card-content {
-        background: linear-gradient(135deg, #868e96 0%, #495057 100%);
-        color: white;
+        height: 100%;
     }
 
     .school-name {
@@ -219,6 +221,45 @@
         margin-bottom: 0;
         padding-left: 20px;
     }
+
+    .problems-list, .solutions-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+
+    .list-group-item {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        padding: 12px;
+        background: white;
+        transition: box-shadow 0.2s;
+    }
+
+    .list-group-item:hover {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .list-group-item h6 {
+        margin-bottom: 8px;
+    }
+
+    .list-group-item h6 a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .list-group-item h6 a:hover {
+        text-decoration: underline;
+    }
+
+    .list-group-item .text-muted {
+        font-size: 0.875rem;
+    }
 </style>
 
 <script>
@@ -273,6 +314,8 @@
                 <div class="detail-card problems">
                     <h5>Problem Statements</h5>
                     <div class="number">${problemCount}</div>
+                    ${problemCount > 0 ? `<button class="btn btn-sm btn-primary mt-2" onclick="showSchoolProblems('${schoolId}', '${schoolName}')">Show Problems</button>` : ''}
+                    <div id="problemsList-${schoolId}" class="problems-list mt-3" style="display: none;"></div>
                 </div>
                 <div class="detail-card ideation">
                     <h5>Ideation Done</h5>
@@ -281,6 +324,8 @@
                 <div class="detail-card solutions">
                     <h5>Solutions Registered</h5>
                     <div class="number">${solutionCount}</div>
+                    ${solutionCount > 0 ? `<button class="btn btn-sm btn-primary mt-2" onclick="showSchoolSolutions('${schoolId}', '${schoolName}')">Show Solutions</button>` : ''}
+                    <div id="solutionsList-${schoolId}" class="solutions-list mt-3" style="display: none;"></div>
                 </div>
             </div>
             <div class="level-criteria">
@@ -291,6 +336,94 @@
         
         section.style.display = 'block';
         section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    async function showSchoolProblems(schoolId, schoolName) {
+        const listElement = document.getElementById(`problemsList-${schoolId}`);
+        
+        // Toggle display
+        if (listElement.style.display === 'none') {
+            listElement.style.display = 'block';
+            listElement.innerHTML = '<p class="text-muted">Loading problems...</p>';
+            
+            try {
+                const response = await fetch(`/program-administrator/api/school/${schoolId}/problems`);
+                const data = await response.json();
+                
+                if (data.problems && data.problems.length > 0) {
+                    let html = '<div class="list-group">';
+                    data.problems.forEach(problem => {
+                        const date = new Date(problem.createdAt).toLocaleDateString();
+                        html += `
+                            <div class="list-group-item">
+                                <h6 class="mb-1">
+                                    <a href="/problems/${problem._id}" target="_blank">${problem.title || 'Untitled Problem'}</a>
+                                </h6>
+                                <p class="mb-1 text-muted small">${problem.description ? problem.description.substring(0, 100) + '...' : 'No description'}</p>
+                                <small class="text-muted">
+                                    ${problem.teamInfo && problem.teamInfo.groupName ? `Group: ${problem.teamInfo.groupName} | ` : ''}
+                                    Created: ${date}
+                                    ${problem.author ? ` | By: ${problem.author.username}` : ''}
+                                </small>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    listElement.innerHTML = html;
+                } else {
+                    listElement.innerHTML = '<p class="text-muted">No problems found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching problems:', error);
+                listElement.innerHTML = '<p class="text-danger">Error loading problems. Please try again.</p>';
+            }
+        } else {
+            listElement.style.display = 'none';
+        }
+    }
+    
+    async function showSchoolSolutions(schoolId, schoolName) {
+        const listElement = document.getElementById(`solutionsList-${schoolId}`);
+        
+        // Toggle display
+        if (listElement.style.display === 'none') {
+            listElement.style.display = 'block';
+            listElement.innerHTML = '<p class="text-muted">Loading solutions...</p>';
+            
+            try {
+                const response = await fetch(`/program-administrator/api/school/${schoolId}/solutions`);
+                const data = await response.json();
+                
+                if (data.solutions && data.solutions.length > 0) {
+                    let html = '<div class="list-group">';
+                    data.solutions.forEach(solution => {
+                        const date = new Date(solution.createdAt).toLocaleDateString();
+                        html += `
+                            <div class="list-group-item">
+                                <h6 class="mb-1">
+                                    <a href="/solution-details?title=${encodeURIComponent(solution.title)}&detail=${encodeURIComponent(solution.detail || '')}&shouldDo=${encodeURIComponent(solution.shouldDo || '')}&shouldNotDo=${encodeURIComponent(solution.shouldNotDo || '')}&keyFeatures=${encodeURIComponent(JSON.stringify(solution.keyFeatures || []))}&implementationSteps=${encodeURIComponent(solution.implementationSteps || '')}&campgroundId=${solution.problem._id}" target="_blank">${solution.title}</a>
+                                </h6>
+                                <p class="mb-1 text-muted small">${solution.detail ? solution.detail.substring(0, 100) + '...' : 'No details'}</p>
+                                <small class="text-muted">
+                                    Problem: ${solution.problem.title || 'Untitled'} | 
+                                    Created: ${date}
+                                    ${solution.author ? ` | By: ${solution.author.username}` : ''}
+                                </small>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    listElement.innerHTML = html;
+                } else {
+                    listElement.innerHTML = '<p class="text-muted">No solutions found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching solutions:', error);
+                listElement.innerHTML = '<p class="text-danger">Error loading solutions. Please try again.</p>';
+            }
+        } else {
+            listElement.style.display = 'none';
+        }
     }
     
     function hideSchoolDetails() {
