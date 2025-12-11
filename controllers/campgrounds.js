@@ -41,7 +41,7 @@ module.exports.renderNewForm = (req, res) => {
     
     if(!campground){
         req.flash('error', 'Problem not found');
-        return res.redirect('/problems')
+        return res.redirect('/dashboard')
     }
 
     // Count ideas for ideation phase completion check
@@ -112,7 +112,7 @@ module.exports.renderNewForm = (req, res) => {
     const campground = await Campground.findById(req.params.id).populate('teamInfo.enrolledProgram');
     if(!campground){
       req.flash('error', 'Cannot find that problem statement');
-      return res.redirect('/problems')
+      return res.redirect('/dashboard')
     }
     
     const programs = await Program.find({ isActive: true }).sort({ name: 1 });
@@ -137,7 +137,7 @@ module.exports.renderNewForm = (req, res) => {
     
     if (!campground) {
       req.flash('error', 'Problem statement not found');
-      return res.redirect('/problems');
+      return res.redirect('/dashboard');
     }
 
     // Update basic campground fields
@@ -216,6 +216,6 @@ module.exports.renderNewForm = (req, res) => {
   module.exports.deleteCampground = async(req, res) =>{
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
-     res.redirect('/problems');
-     req.flash('success', 'Problem deleted');
+    req.flash('success', 'Problem deleted');
+    res.redirect('/dashboard');
   }
