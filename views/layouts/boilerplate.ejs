@@ -14,7 +14,8 @@
     const pageDescription = typeof description !== 'undefined' ? description : 'Start your innovation Journey. Guide your team through the complete innovation process. Discover problems, define solutions, ideate concepts, prototype ideas, and test with structured workflows.';
     const baseUrl = typeof baseURL !== 'undefined' ? baseURL : (process.env.BASE_URL || 'http://localhost:3000');
     const currentUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : (baseUrl + (typeof originalUrl !== 'undefined' ? originalUrl : ''));
-    const ogImageUrl = typeof ogImage !== 'undefined' ? ogImage : (baseUrl + '/images/og-image.png');
+    // Use logo as Open Graph image for search results
+    const ogImageUrl = typeof ogImage !== 'undefined' ? ogImage : (baseUrl + '/images/logo-tranparent.png');
     %>
     <title><%= pageTitle %></title>
     <meta name="title" content="<%= pageTitle %>">
@@ -75,6 +76,8 @@
       "name": "Erehwon",
       "description": "<%= pageDescription %>",
       "url": "<%= baseUrl %>",
+      "image": "<%= baseUrl %>/images/logo-tranparent.png",
+      "logo": "<%= baseUrl %>/images/logo-tranparent.png",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "offers": {

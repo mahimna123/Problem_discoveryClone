@@ -4,10 +4,14 @@
     <div class="row">
         <div class="col-md-6 offset-md-3 col-xl-4 offset-xl-4">
             <div class="card shadow">
-                <img src="https://images.unsplash.com/photo-1571863533956-01c88e79957e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80"
-                    alt="" class="card-img-top" />
+                <div class="card-img-top d-flex justify-content-center align-items-center bg-dark" style="height: 200px; padding: 20px;">
+                    <img src="/images/logo-tranparent.png" alt="Erehwon Logo" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Login</h5>
+                    <h5 class="card-title text-center">
+                        <img src="/images/logo-tranparent.png" alt="Erehwon" style="height: 32px; width: auto; margin-right: 8px; vertical-align: middle;">
+                        Login
+                    </h5>
                     
                     <!-- Google OAuth Button (only show if configured) -->
                     <% if (process.env.GOOGLE_CLIENT_ID) { %>

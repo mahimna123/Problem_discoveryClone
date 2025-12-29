@@ -261,7 +261,7 @@ app.get("/", async (req, res) => {
   const seoData = {
     title: "Erehwon - Innovation Process Made Collaborative",
     description: "Start your innovation Journey. Guide your team through the complete innovation process. Discover problems, define solutions, ideate concepts, prototype ideas, and test with structured workflows.",
-    ogImage: (process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`) + "/images/og-image.png"
+    ogImage: (process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`) + "/images/logo-tranparent.png"
   };
   
   res.render("home", { campgrounds, programs, ...seoData });
