@@ -32,6 +32,9 @@
     <meta property="og:title" content="<%= pageTitle %>">
     <meta property="og:description" content="<%= pageDescription %>">
     <meta property="og:image" content="<%= ogImageUrl %>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Erehwon Logo">
     <meta property="og:site_name" content="Erehwon">
     <meta property="og:locale" content="en_US">
     
@@ -41,16 +44,20 @@
     <meta property="twitter:title" content="<%= pageTitle %>">
     <meta property="twitter:description" content="<%= pageDescription %>">
     <meta property="twitter:image" content="<%= ogImageUrl %>">
+    <meta property="twitter:image:alt" content="Erehwon Logo">
     
     <!-- Canonical URL -->
     <link rel="canonical" href="<%= currentUrl %>">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/images/logo-tranparent.png">
-    <link rel="shortcut icon" type="image/png" href="/images/logo-tranparent.png">
-    <link rel="apple-touch-icon" href="/images/logo-tranparent.png">
+    <!-- Favicon - Erehwon Logo -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logo-tranparent.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/logo-tranparent.png">
+    <link rel="shortcut icon" href="/images/logo-tranparent.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/logo-tranparent.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#ffde00">
+    <meta name="msapplication-TileImage" content="/images/logo-tranparent.png">
+    <meta name="msapplication-TileColor" content="#ffde00">
     
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -108,7 +115,13 @@
       "@type": "Organization",
       "name": "Erehwon",
       "url": "<%= baseUrl %>",
-      "logo": "<%= baseUrl %>/images/logo-tranparent.png",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "<%= baseUrl %>/images/logo-tranparent.png",
+        "width": "1200",
+        "height": "630"
+      },
+      "image": "<%= baseUrl %>/images/logo-tranparent.png",
       "sameAs": []
     }
     </script>

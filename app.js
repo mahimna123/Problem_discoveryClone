@@ -267,6 +267,11 @@ app.get("/", async (req, res) => {
   res.render("home", { campgrounds, programs, ...seoData });
 });
 
+// Favicon route - serve logo as favicon
+app.get("/favicon.ico", (req, res) => {
+  res.redirect("/images/logo-tranparent.png");
+});
+
 // Robots.txt route
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
