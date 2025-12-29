@@ -58,6 +58,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(morgan("dev"));
+
+// Favicon route - MUST come before static file serving
+app.get("/favicon.ico", (req, res) => {
+  res.type("image/png");
+  res.sendFile(path.join(__dirname, "public/images/logo-tranparent.png"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -265,12 +272,6 @@ app.get("/", async (req, res) => {
   };
   
   res.render("home", { campgrounds, programs, ...seoData });
-});
-
-// Favicon route - serve logo as favicon
-app.get("/favicon.ico", (req, res) => {
-  res.type("image/png");
-  res.sendFile(path.join(__dirname, "public/images/logo-tranparent.png"));
 });
 
 // Robots.txt route
