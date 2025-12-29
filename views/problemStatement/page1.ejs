@@ -1,0 +1,131 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <div class="col-10 offset-1">
+        <h1 class="text-center mb-4">Excite and Enrol</h1>
+        <form action="/excite-and-enrol" method="POST" novalidate class="validated-form">
+            <% if (campgroundId) { %>
+                <input type="hidden" name="campgroundId" value="<%= campgroundId %>">
+            <% } %>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="schoolName">School Name</label>
+                    <select class="form-select" id="schoolName" name="schoolName" required>
+                        <option value="">Select a School</option>
+                        <% if (schools && schools.length > 0) { %>
+                            <% schools.forEach(school => { %>
+                                <option value="<%= school._id %>" <%= (campground && campground.teamInfo && campground.teamInfo.schoolName === school.name) ? 'selected' : '' %>><%= school.name %></option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="">No schools available. Please contact admin.</option>
+                        <% } %>
+                    </select>
+                    <div class="valid-feedback">Looks good!</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="className">Class Name</label>
+                    <input class="form-control" type="text" id="className" name="className" value="<%= (campground && campground.teamInfo && campground.teamInfo.className) ? campground.teamInfo.className : '' %>" required>
+                    <div class="valid-feedback">Looks good!</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="groupMembers">Group Members</label>
+                    <textarea class="form-control" id="groupMembers" name="groupMembers" rows="3" required><%= (campground && campground.teamInfo && campground.teamInfo.groupMembers) ? campground.teamInfo.groupMembers : '' %></textarea>
+                    <div class="valid-feedback">Looks good!</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" for="groupName">Group Name</label>
+                    <input class="form-control" type="text" id="groupName" name="groupName" value="<%= (campground && campground.teamInfo && campground.teamInfo.groupName) ? campground.teamInfo.groupName : '' %>" required>
+                    <div class="valid-feedback">Looks good!</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="enrolledProgram">Enrolled Program</label>
+                    <select class="form-select" id="enrolledProgram" name="enrolledProgram" required>
+                        <option value="">Select a Program</option>
+                        <% if (programs && programs.length > 0) { %>
+                            <% programs.forEach(program => { %>
+                                <option value="<%= program._id %>" <%= (campground && campground.teamInfo && campground.teamInfo.enrolledProgram && campground.teamInfo.enrolledProgram.toString() === program._id.toString()) ? 'selected' : '' %>><%= program.name %></option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="">No programs available. Please contact admin.</option>
+                        <% } %>
+                    </select>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="sdgGoal">SDG Goal selected for the challenge</label>
+                    <select class="form-select" id="sdgGoal" name="sdgGoal" required>
+                        <option value="">Select an SDG Goal</option>
+                        <% sdgGoals.forEach(goal => { %>
+                            <option value="<%= goal.title %>" <%= (campground && campground.teamInfo && campground.teamInfo.sdgGoal === goal.title) ? 'selected' : '' %>><%= goal.number %>. <%= goal.title %></option>
+                        <% }); %>
+                    </select>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">What are the steps of innovation process?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="innovationProcessSteps" id="innovationOption1" value="Problem discovery>Creative Ideation >Concepual solution>Prototyping>Market Ready solution" <%= (campground && campground.teamInfo && campground.teamInfo.innovationProcessSteps === 'Problem discovery>Creative Ideation >Concepual solution>Prototyping>Market Ready solution') ? 'checked' : '' %> required>
+                    <label class="form-check-label" for="innovationOption1">
+                        1) Problem discovery > Creative Ideation > Conceptual solution > Prototyping > Market Ready solution
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="innovationProcessSteps" id="innovationOption2" value="Concepual solution>Problem discovery>Creative Ideation >Prototyping>Market Ready solution" <%= (campground && campground.teamInfo && campground.teamInfo.innovationProcessSteps === 'Concepual solution>Problem discovery>Creative Ideation >Prototyping>Market Ready solution') ? 'checked' : '' %> required>
+                    <label class="form-check-label" for="innovationOption2">
+                        2) Conceptual solution > Problem discovery > Creative Ideation > Prototyping > Market Ready solution
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="innovationProcessSteps" id="innovationOption3" value="Problem discovery>Creative Ideation >Prototyping>Market Ready solution>Conceptual solution" <%= (campground && campground.teamInfo && campground.teamInfo.innovationProcessSteps === 'Problem discovery>Creative Ideation >Prototyping>Market Ready solution>Conceptual solution') ? 'checked' : '' %> required>
+                    <label class="form-check-label" for="innovationOption3">
+                        3) Problem discovery > Creative Ideation > Prototyping > Market Ready solution > Conceptual solution
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="innovationProcessSteps" id="innovationOption4" value="Problem discovery>Concepual solution>Prototyping>Market Ready solution" <%= (campground && campground.teamInfo && campground.teamInfo.innovationProcessSteps === 'Problem discovery>Concepual solution>Prototyping>Market Ready solution') ? 'checked' : '' %> required>
+                    <label class="form-check-label" for="innovationOption4">
+                        4) Problem discovery > Conceptual solution > Prototyping > Market Ready solution
+                    </label>
+                </div>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                    <label class="form-label" for="problemDiscoveryMethod">How do you do Problem discovery?</label>
+                    <textarea class="form-control" id="problemDiscoveryMethod" name="problemDiscoveryMethod" rows="4" required><%= (campground && campground.teamInfo && campground.teamInfo.problemDiscoveryMethod) ? campground.teamInfo.problemDiscoveryMethod : '' %></textarea>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                    <label class="form-label" for="communityChallenges">What Challenges have you seen in and around your community which personally impact you?</label>
+                    <textarea class="form-control" id="communityChallenges" name="communityChallenges" rows="4" required><%= (campground && campground.teamInfo && campground.teamInfo.communityChallenges) ? campground.teamInfo.communityChallenges : '' %></textarea>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                    <label class="form-label" for="fiveYearProblem">Given time and resources, what community problem would you like to spend next 5 years in solving?</label>
+                    <textarea class="form-control" id="fiveYearProblem" name="fiveYearProblem" rows="4" required><%= (campground && campground.teamInfo && campground.teamInfo.fiveYearProblem) ? campground.teamInfo.fiveYearProblem : '' %></textarea>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                    <label class="form-label" for="technologyApplicationReason">Why do we learn the application of technology?</label>
+                    <textarea class="form-control" id="technologyApplicationReason" name="technologyApplicationReason" rows="4" required><%= (campground && campground.teamInfo && campground.teamInfo.technologyApplicationReason) ? campground.teamInfo.technologyApplicationReason : '' %></textarea>
+                <div class="valid-feedback">Looks good!</div>
+            </div>
+
+            <div class="mb-3 text-center">
+                <button type="submit" class="btn btn-primary btn-lg">Submit Form</button>
+            </div>
+        </form>
+    </div>
+</div>
+

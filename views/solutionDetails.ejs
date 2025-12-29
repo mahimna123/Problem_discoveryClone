@@ -1,0 +1,151 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Solution Details</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><%= title %></h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h3 class="h5">Required Behaviors</h3>
+                        <div class="p-3 bg-light rounded" style="background-color: #f8f9fa !important; color: #212529 !important;">
+                            <% if (shouldDo) { %>
+                                <%- shouldDo.split('\n').map(line => `<p class="mb-1" style="color: #212529 !important;">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1" style="color: #212529 !important;">No required behaviors specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Prohibited Behaviors</h3>
+                        <div class="p-3 bg-light rounded" style="background-color: #f8f9fa !important; color: #212529 !important;">
+                            <% if (shouldNotDo) { %>
+                                <%- shouldNotDo.split('\n').map(line => `<p class="mb-1" style="color: #212529 !important;">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1" style="color: #212529 !important;">No prohibited behaviors specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Key Features</h3>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" style="background-color: #fff !important;">
+                                <thead class="table-light" style="background-color: #f8f9fa !important;">
+                                    <tr>
+                                        <th style="color: #212529 !important;">Feature</th>
+                                        <th style="color: #212529 !important;">Format</th>
+                                        <th style="color: #212529 !important;">Usage</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="background-color: #fff !important;">
+                                    <% if (keyFeatures && keyFeatures !== '[]') { %>
+                                        <% try { %>
+                                            <% const features = typeof keyFeatures === 'string' ? JSON.parse(keyFeatures) : keyFeatures; %>
+                                            <% if (Array.isArray(features) && features.length > 0) { %>
+                                                <% features.forEach(feature => { %>
+                                                    <tr>
+                                                        <td style="color: #212529 !important;"><%= feature.feature || '' %></td>
+                                                        <td style="color: #212529 !important;"><%= feature.format || '' %></td>
+                                                        <td style="color: #212529 !important;"><%= feature.usage || '' %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="3" style="color: #212529 !important;">No features available</td>
+                                                </tr>
+                                            <% } %>
+                                        <% } catch (error) { %>
+                                            <tr>
+                                                <td colspan="3" style="color: #212529 !important;">Error displaying features</td>
+                                            </tr>
+                                        <% } %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="3" style="color: #212529 !important;">No key features specified</td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Implementation Steps</h3>
+                        <div class="p-3 bg-light rounded" style="background-color: #f8f9fa !important; color: #212529 !important;">
+                            <% if (implementationSteps) { %>
+                                <%- implementationSteps.split('\n').map(line => `<p class="mb-1" style="color: #212529 !important;">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1" style="color: #212529 !important;">No implementation steps specified.</p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="h5">Technical Specifications</h3>
+                        <div class="p-3 bg-light rounded" style="background-color: #f8f9fa !important; color: #212529 !important;">
+                            <% if (detail) { %>
+                                <%- detail.split('\n').map(line => `<p class="mb-1" style="color: #212529 !important;">${line}</p>`).join('') %>
+                            <% } else { %>
+                                <p class="mb-1" style="color: #212529 !important;">No technical specifications available.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <div>
+                    <% if (!hasAIDetail) { %>
+                        <button type="button" class="btn btn-primary me-2" id="askAISolutionBtn">
+                            <i class="fas fa-robot"></i> Ask AI Solution
+                        </button>
+                    <% } %>
+                    <a href="/define-solution?campgroundId=<%= campgroundId %>" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Solution
+                    </a>
+                </div>
+            </div>
+            
+            <% if (!hasAIDetail) { %>
+            <script>
+            document.getElementById('askAISolutionBtn').addEventListener('click', async function() {
+                const btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Asking AI...';
+                
+                try {
+                    const response = await fetch('/api/deepseek', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ campgroundId: '<%= campgroundId %>' })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'An error occurred while processing your solution with AI.');
+                    }
+                    
+                    // Reload the page to show AI response
+                    window.location.reload();
+                } catch (error) {
+                    alert(error.message || 'An error occurred while processing your solution with AI.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-robot"></i> Ask AI Solution';
+                }
+            });
+            </script>
+            <% } %>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,150 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <div class="col-10 offset-1">
+        <h1 class="text-center mb-4">Update Problem Statement</h1>
+        
+        <div class="card" style="border: 1px solid #000;">
+            <div class="card-body">
+                <form action="/problems/<%=campground._id%>?_method=PUT" method="POST" enctype="multipart/form-data">
+                    
+                    <!-- School and Program Information -->
+                    <h5 class="mb-3 mt-3">School and Program Information</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="schoolName"><strong>School Name</strong></label>
+                            <select class="form-select" id="schoolName" name="teamInfo[schoolName]">
+                                <option value="">Select a School</option>
+                                <% if (schools && schools.length > 0) { %>
+                                    <% schools.forEach(school => { %>
+                                        <option value="<%= school.name %>" <%= (campground.teamInfo && campground.teamInfo.schoolName === school.name) ? 'selected' : '' %>><%= school.name %></option>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="">No schools available. Please contact admin.</option>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="enrolledProgram"><strong>Enrolled Program</strong></label>
+                            <select class="form-select" id="enrolledProgram" name="teamInfo[enrolledProgram]">
+                                <option value="">Select a Program</option>
+                                <% if (programs && programs.length > 0) { %>
+                                    <% programs.forEach(program => { %>
+                                        <option value="<%= program._id %>" <%= (campground.teamInfo && campground.teamInfo.enrolledProgram && campground.teamInfo.enrolledProgram.toString() === program._id.toString()) ? 'selected' : '' %>><%= program.name %></option>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="">No programs available. Please contact admin.</option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="className"><strong>Class Name</strong></label>
+                            <input class="form-control" type="text" id="className" name="teamInfo[className]" 
+                                value="<%= (campground.teamInfo && campground.teamInfo.className) ? campground.teamInfo.className : '' %>">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="groupName"><strong>Group Name</strong></label>
+                            <input class="form-control" type="text" id="groupName" name="teamInfo[groupName]" 
+                                value="<%= (campground.teamInfo && campground.teamInfo.groupName) ? campground.teamInfo.groupName : '' %>">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="groupMembers"><strong>Group Members</strong></label>
+                        <textarea class="form-control" id="groupMembers" name="teamInfo[groupMembers]" rows="3"><%= (campground.teamInfo && campground.teamInfo.groupMembers) ? campground.teamInfo.groupMembers : '' %></textarea>
+                    </div>
+
+                    <!-- Problem Statement Details -->
+                    <h5 class="mb-3 mt-4">Problem Statement Details</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="title"><strong>Who is Having this problem? and What is the problem?</strong></label>
+                        <input class="form-control" type="text" id="title" name="campground[title]" value="<%= campground.title %>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="description"><strong>How do you want to solve it?</strong></label>
+                        <textarea class="form-control" id="description" name="campground[description]" rows="4"><%= campground.description %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="location"><strong>Location</strong></label>
+                        <input class="form-control" type="text" id="location" name="campground[location]" value="<%= campground.location %>">
+                    </div>
+
+                    <!-- Additional Team Information -->
+                    <h5 class="mb-3 mt-4">Additional Information</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="sdgGoal"><strong>SDG Goal</strong></label>
+                        <select class="form-select" id="sdgGoal" name="teamInfo[sdgGoal]">
+                            <option value="">Select an SDG Goal</option>
+                            <% sdgGoals.forEach(goal => { %>
+                                <option value="<%= goal.title %>" <%= (campground.teamInfo && campground.teamInfo.sdgGoal === goal.title) ? 'selected' : '' %>><%= goal.number %>. <%= goal.title %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="problemDiscoveryMethod"><strong>How do you do Problem discovery?</strong></label>
+                        <textarea class="form-control" id="problemDiscoveryMethod" name="teamInfo[problemDiscoveryMethod]" rows="4"><%= (campground.teamInfo && campground.teamInfo.problemDiscoveryMethod) ? campground.teamInfo.problemDiscoveryMethod : '' %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="communityChallenges"><strong>What Challenges have you seen in and around your community which personally impact you?</strong></label>
+                        <textarea class="form-control" id="communityChallenges" name="teamInfo[communityChallenges]" rows="4"><%= (campground.teamInfo && campground.teamInfo.communityChallenges) ? campground.teamInfo.communityChallenges : '' %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fiveYearProblem"><strong>Given time and resources, what community problem would you like to spend next 5 years in solving?</strong></label>
+                        <textarea class="form-control" id="fiveYearProblem" name="teamInfo[fiveYearProblem]" rows="4"><%= (campground.teamInfo && campground.teamInfo.fiveYearProblem) ? campground.teamInfo.fiveYearProblem : '' %></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="technologyApplicationReason"><strong>Why do we learn the application of technology?</strong></label>
+                        <textarea class="form-control" id="technologyApplicationReason" name="teamInfo[technologyApplicationReason]" rows="4"><%= (campground.teamInfo && campground.teamInfo.technologyApplicationReason) ? campground.teamInfo.technologyApplicationReason : '' %></textarea>
+                    </div>
+
+                    <!-- Images -->
+                    <h5 class="mb-3 mt-4">Images</h5>
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label"><strong>Add more images</strong></label>
+                        <input class="form-control" type="file" id="image" name="image" multiple>
+                    </div>
+
+                    <div class="mb-3">
+                        <% if(campground.images && campground.images.length) { %>
+                            <h6>Current Images</h6>
+                            <div class="row">
+                                <% campground.images.forEach(function(img, i) { %>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card">
+                                            <img src="<%=img.url %>" class="img-thumbnail" alt="">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input type="checkbox" id="image-<%=i%>" name="deleteImages[]" value="<%=img.filename%>" class="form-check-input">
+                                                    <label for="image-<%=i%>" class="form-check-label">Delete?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">Update Problem Statement</button>
+                        <a href="/problems/<%=campground._id%>" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

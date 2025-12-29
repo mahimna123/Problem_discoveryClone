@@ -1,0 +1,63 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-white mb-0">Create Corporate Problem Statement</h2>
+                </div>
+                <div class="card-body">
+                    <form action="/corporate-problems" method="POST">
+                        <div class="mb-3">
+                            <label for="title" class="form-label text-white">Title *</label>
+                            <input type="text" class="form-control" id="title" name="corporateProblem[title]" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="companyName" class="form-label text-white">Company Name *</label>
+                            <input type="text" class="form-control" id="companyName" name="corporateProblem[companyName]" placeholder="Enter the company name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label text-white">Description *</label>
+                            <textarea class="form-control" id="description" name="corporateProblem[description]" rows="5" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label text-white">Category</label>
+                            <input type="text" class="form-control" id="category" name="corporateProblem[category]" placeholder="e.g., Technology, Healthcare, Education">
+                        </div>
+
+                        <h4 class="text-white mt-4 mb-3">Problem Statement Details (Optional)</h4>
+
+                        <div class="mb-3">
+                            <label for="whoHasProblem" class="form-label text-white">Who has the problem?</label>
+                            <textarea class="form-control" id="whoHasProblem" name="corporateProblem[problemStatement][whoHasProblem]" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="whatIsProblem" class="form-label text-white">What is the problem?</label>
+                            <textarea class="form-control" id="whatIsProblem" name="corporateProblem[problemStatement][whatIsProblem]" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="expectedBenefit" class="form-label text-white">Expected benefit?</label>
+                            <textarea class="form-control" id="expectedBenefit" name="corporateProblem[problemStatement][expectedBenefit]" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Problem Statement
+                            </button>
+                            <a href="/corporate-problems" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

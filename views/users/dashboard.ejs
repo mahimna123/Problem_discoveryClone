@@ -1,0 +1,325 @@
+<% layout('layouts/boilerplate') %>
+
+<style>
+.dashboard-container {
+    background: #0a0a0a;
+    min-height: 100vh;
+    padding: 40px 0;
+    color: #fff;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.dashboard-title-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.dashboard-title-section p {
+    color: #888;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.new-project-btn {
+    background: #ffde00;
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.new-project-btn:hover {
+    background: #e6c800;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+}
+
+.project-card {
+    background: #111;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #2a2a2a;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.project-card:hover {
+    border-color: #ffde00;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 222, 0, 0.2);
+}
+
+.project-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.project-card-description {
+    color: #aaa;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.progress-section {
+    margin-bottom: 20px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.progress-phase {
+    color: #ffde00;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.progress-percentage {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: #2a2a2a;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #ffde00;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.team-avatars {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.team-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffde00, #ffed4e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 600;
+    font-size: 0.75rem;
+    border: 2px solid #111;
+}
+
+.team-avatar:nth-child(2) {
+    margin-left: -8px;
+}
+
+.team-avatar:nth-child(3) {
+    margin-left: -8px;
+}
+
+.open-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.open-btn:hover {
+    border-color: #ffde00;
+    color: #ffde00;
+    background: rgba(255, 222, 0, 0.1);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: #111;
+    border-radius: 16px;
+    border: 1px solid #2a2a2a;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #ffde00;
+    margin-bottom: 20px;
+}
+
+.empty-state h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: #888;
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+.empty-state-btn {
+    background: #ffde00;
+    color: #000;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.empty-state-btn:hover {
+    background: #e6c800;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+</style>
+
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="dashboard-title-section">
+                <h1>Your Projects</h1>
+                <p>Manage and track your active innovation initiatives</p>
+            </div>
+            <a href="/excite-and-enrol" class="new-project-btn">
+                <i class="fas fa-plus"></i> New Project
+            </a>
+    </div>
+
+    <% if(campgrounds.length === 0) { %>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h2>No Projects Yet</h2>
+                <p>Start by creating your first project to begin your innovation journey!</p>
+                <a href="/excite-and-enrol" class="empty-state-btn">
+                    <i class="fas fa-plus"></i> Create Your First Project
+                </a>
+            </div>
+        <% } else { %>
+            <div class="projects-grid">
+                <% campgrounds.forEach(campground => { 
+                    // Get team member initials for avatars
+                    let teamInitials = [];
+                    if (campground.teamInfo && campground.teamInfo.groupMembers) {
+                        const members = campground.teamInfo.groupMembers.split(',').map(m => m.trim());
+                        teamInitials = members.slice(0, 3).map(m => m.charAt(0).toUpperCase());
+                    }
+                    // If no group members, use author initial
+                    if (teamInitials.length === 0 && campground.author) {
+                        teamInitials = [campground.author.username.charAt(0).toUpperCase()];
+                    }
+                %>
+                    <div class="project-card">
+                        <h3 class="project-card-title"><%= campground.title %></h3>
+                        <p class="project-card-description">
+                            <%= campground.description || campground.problem || 'Innovation project for solving real-world problems' %>
+                        </p>
+                        
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span class="progress-phase"><%= campground.currentStage || 'Excite & Enrol' %></span>
+                                <span class="progress-percentage"><%= campground.progress || 0 %>%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: <%= campground.progress || 0 %>%"></div>
+                            </div>
+                            <!-- Incomplete Steps -->
+                            <% 
+                            const stages = [
+                                { num: 1, name: 'Excite & Enrol', completed: campground.stageProgress && campground.stageProgress[1] === 20 },
+                                { num: 2, name: 'Problem Discovery', completed: campground.stageProgress && campground.stageProgress[2] === 20 },
+                                { num: 3, name: 'Ideation', completed: campground.stageProgress && campground.stageProgress[3] === 20 },
+                                { num: 4, name: 'Conceptual Solution', completed: campground.stageProgress && campground.stageProgress[4] === 20 },
+                                { num: 5, name: 'Prototyping', completed: campground.stageProgress && campground.stageProgress[5] === 20 }
+                            ];
+                            const incompleteStages = stages.filter(s => !s.completed);
+                            %>
+                            <% if (incompleteStages.length > 0) { %>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2a2a;">
+                                    <div style="color: #888; font-size: 0.75rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Remaining Steps:</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                        <% incompleteStages.forEach(stage => { %>
+                                            <span style="display: inline-block; padding: 4px 10px; background: rgba(255, 222, 0, 0.1); border: 1px solid rgba(255, 222, 0, 0.3); border-radius: 12px; color: #ffde00; font-size: 0.7rem; font-weight: 500;">
+                                                <%= stage.name %>
+                                            </span>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <% if (teamInitials.length > 0) { %>
+                            <div class="team-avatars">
+                                <% teamInitials.forEach(initial => { %>
+                                    <div class="team-avatar"><%= initial %></div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                        
+                        <a href="/problems/<%= campground._id %>" class="open-btn">
+                            Open <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                <% }); %>
+        </div>
+    <% } %>
+    </div>
+</div>

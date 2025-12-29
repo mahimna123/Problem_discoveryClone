@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Erehwon">
+    
+    <!-- Primary Meta Tags -->
+    <% 
+    const pageTitle = typeof title !== 'undefined' ? title : 'Erehwon - Innovation Process Made Collaborative';
+    const pageDescription = typeof description !== 'undefined' ? description : 'Start your innovation Journey. Guide your team through the complete innovation process. Discover problems, define solutions, ideate concepts, prototype ideas, and test with structured workflows.';
+    const baseUrl = typeof baseURL !== 'undefined' ? baseURL : (process.env.BASE_URL || 'http://localhost:3000');
+    const currentUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : (baseUrl + (typeof originalUrl !== 'undefined' ? originalUrl : ''));
+    const ogImageUrl = typeof ogImage !== 'undefined' ? ogImage : (baseUrl + '/images/og-image.png');
+    %>
+    <title><%= pageTitle %></title>
+    <meta name="title" content="<%= pageTitle %>">
+    <meta name="description" content="<%= pageDescription %>">
+    <meta name="keywords" content="innovation, problem solving, ideation, prototyping, collaboration, team workflow, innovation process, design thinking, solution development">
+    <meta name="author" content="Erehwon">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= currentUrl %>">
+    <meta property="og:title" content="<%= pageTitle %>">
+    <meta property="og:description" content="<%= pageDescription %>">
+    <meta property="og:image" content="<%= ogImageUrl %>">
+    <meta property="og:site_name" content="Erehwon">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= currentUrl %>">
+    <meta property="twitter:title" content="<%= pageTitle %>">
+    <meta property="twitter:description" content="<%= pageDescription %>">
+    <meta property="twitter:image" content="<%= ogImageUrl %>">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= currentUrl %>">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/logo-tranparent.png">
+    <link rel="shortcut icon" type="image/png" href="/images/logo-tranparent.png">
+    <link rel="apple-touch-icon" href="/images/logo-tranparent.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#ffde00">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.maptiler.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.maptiler.com">
+    
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+    <script crossorigin="anonymous" src="https://cdn.maptiler.com/maptiler-sdk-js/v2.5.1/maptiler-sdk.umd.min.js"></script>
+    <link crossorigin="anonymous" href="https://cdn.maptiler.com/maptiler-sdk-js/v2.5.1/maptiler-sdk.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Erehwon",
+      "description": "<%= pageDescription %>",
+      "url": "<%= baseUrl %>",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150"
+      },
+      "featureList": [
+        "5-Phase Innovation Workflow",
+        "Team Collaboration",
+        "Problem Discovery",
+        "Solution Ideation",
+        "Prototyping Tools",
+        "Progress Tracking"
+      ]
+    }
+    </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Erehwon",
+      "url": "<%= baseUrl %>",
+      "logo": "<%= baseUrl %>/images/logo-tranparent.png",
+      "sameAs": []
+    }
+    </script>
+</head>
+<body class="d-flex flex-column" style="min-height: 100vh; padding-bottom: 60px;">
+    <%- include('../partials/navbar') %>
+    <main class="container">
+        <%- include('../partials/flash') %>
+        <%- body %>
+    </main>
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <script src="/javascripts/validatedForms.js" crossorigin="anonymous"></script>
+</body>
+</html>

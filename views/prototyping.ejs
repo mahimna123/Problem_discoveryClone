@@ -1,0 +1,469 @@
+<% layout('layouts/boilerplate')%>
+
+<style>
+.prototyping-page {
+    background: #0a0a0a;
+    min-height: 100vh;
+    padding: 40px 0;
+    color: #fff;
+}
+
+.prototyping-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.prototyping-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.prototyping-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.prototyping-subtitle {
+    font-size: 1.1rem;
+    color: #888;
+}
+
+.prototyping-content {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 30px;
+}
+
+.info-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.info-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-card h3 i {
+    color: #ffde00;
+}
+
+.info-card p {
+    color: #aaa;
+    line-height: 1.6;
+}
+
+.prototype-form-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.form-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-title i {
+    color: #ffde00;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #ffde00;
+    box-shadow: 0 0 0 3px rgba(255, 222, 0, 0.1);
+}
+
+.form-control::placeholder {
+    color: #666;
+}
+
+.form-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.btn-submit {
+    background: #ffde00;
+    color: #000;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-submit:hover {
+    background: #e6c800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 222, 0, 0.3);
+}
+
+.prototype-files-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 24px;
+}
+
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.file-item {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.file-item:hover {
+    border-color: #ffde00;
+    transform: translateY(-2px);
+}
+
+.file-preview {
+    width: 100%;
+    height: 150px;
+    background: #0a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.file-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-preview.file-icon {
+    font-size: 3rem;
+    color: #ffde00;
+}
+
+.file-info {
+    padding: 16px;
+}
+
+.file-name {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0 0 12px 0;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+.btn-delete-file {
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-delete-file:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.sidebar-section {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.sidebar-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-section h3 i {
+    color: #ffde00;
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instructions-list li {
+    color: #aaa;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.instructions-list li:before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #ffde00;
+    font-weight: bold;
+}
+
+.empty-files {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-files i {
+    font-size: 3rem;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 992px) {
+    .prototyping-content {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="prototyping-page">
+    <div class="prototyping-container">
+        <div class="prototyping-header">
+            <h1 class="prototyping-title">Prototyping</h1>
+            <p class="prototyping-subtitle">Upload your prototype files and document your progress</p>
+        </div>
+
+        <div class="prototyping-content">
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Problem Info Card -->
+                <div class="info-card">
+                    <h3><i class="fas fa-lightbulb"></i> <%= problem.title %></h3>
+                    <% if (problem.description) { %>
+                        <p><%= problem.description.substring(0, 200) %><%= problem.description.length > 200 ? '...' : '' %></p>
+                    <% } else if (problem.problem) { %>
+                        <p><%= problem.problem.substring(0, 200) %><%= problem.problem.length > 200 ? '...' : '' %></p>
+                    <% } %>
+                </div>
+
+                <!-- Prototype Form -->
+                <div class="prototype-form-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-upload"></i> Upload Your Prototype
+                    </h2>
+                    
+                    <form action="/prototyping/<%= problemId %>" method="POST" enctype="multipart/form-data" id="prototypeForm">
+                        <div class="form-group">
+                            <label for="prototypeTitle" class="form-label">Prototype Title</label>
+                            <input type="text" class="form-control" id="prototypeTitle" name="title" 
+                                value="<%= prototype ? (prototype.title || '') : '' %>" 
+                                placeholder="Enter a title for your prototype" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prototypeDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="prototypeDescription" name="description" rows="4" 
+                                placeholder="Describe your prototype, its features, and how it solves the problem..."><%= prototype ? (prototype.description || '') : '' %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prototypeFiles" class="form-label">Upload Files</label>
+                            <input type="file" class="form-control" id="prototypeFiles" name="prototypeFiles" 
+                                multiple accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.7z">
+                            <small class="form-text">You can upload images, videos, documents (PDF, Word), or compressed files (ZIP, RAR)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prototypeNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="prototypeNotes" name="notes" rows="4" 
+                                placeholder="Add any additional notes about your prototype, testing results, or feedback..."><%= prototype ? (prototype.notes || '') : '' %></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-save"></i> Save Prototype
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Existing Prototype Files -->
+                <div class="prototype-files-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-folder-open"></i> Uploaded Files
+                    </h2>
+                    <% if (prototype && prototype.files && prototype.files.length > 0) { %>
+                        <div class="files-grid">
+                            <% prototype.files.forEach((file, index) => { %>
+                                <div class="file-item">
+                                    <% if (file.fileType === 'image') { %>
+                                        <div class="file-preview">
+                                            <img src="<%= file.url %>" alt="Prototype file">
+                                        </div>
+                                    <% } else if (file.fileType === 'video') { %>
+                                        <div class="file-preview file-icon">
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="file-preview file-icon">
+                                            <i class="fas fa-file"></i>
+                                        </div>
+                                    <% } %>
+                                    <div class="file-info">
+                                        <p class="file-name"><%= file.filename %></p>
+                                        <button type="button" class="btn-delete-file" data-file-index="<%= index %>">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-files">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No files uploaded yet. Upload your prototype files above.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+                    <ul class="instructions-list">
+                        <li>Upload images, videos, or documents of your prototype</li>
+                        <li>Provide a clear title and description</li>
+                        <li>Add notes about testing and feedback</li>
+                        <li>You can upload multiple files</li>
+                        <li>Files can be deleted individually</li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-check-circle"></i> Success Criteria</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; line-height: 1.6;">
+                        Upload at least one prototype file to complete this phase. Your prototype should demonstrate how your solution addresses the problem.
+                    </p>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-file-upload"></i> Supported Formats</h3>
+                    <ul class="instructions-list">
+                        <li>Images: JPG, PNG, GIF</li>
+                        <li>Videos: MP4, MOV, AVI</li>
+                        <li>Documents: PDF, DOC, DOCX</li>
+                        <li>Archives: ZIP, RAR, 7Z</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle file deletion
+document.querySelectorAll('.btn-delete-file').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const fileIndex = this.getAttribute('data-file-index');
+        const problemId = '<%= problemId %>';
+        
+        if (!confirm('Are you sure you want to delete this file?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/prototyping/${problemId}/file/${fileIndex}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                location.reload();
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Failed to delete file');
+            }
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            alert('Failed to delete file. Please try again.');
+        }
+    });
+});
+
+// File input preview
+const fileInput = document.getElementById('prototypeFiles');
+if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            console.log(`${files.length} file(s) selected for upload`);
+        }
+    });
+}
+</script>
+

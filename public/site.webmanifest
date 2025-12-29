@@ -1,0 +1,19 @@
+{
+  "name": "Erehwon - Innovation Process Made Collaborative",
+  "short_name": "Erehwon",
+  "description": "Guide your team through the complete innovation process",
+  "icons": [
+    {
+      "src": "/images/logo-tranparent.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#ffde00",
+  "background_color": "#0a0a0a",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait-primary"
+}
+

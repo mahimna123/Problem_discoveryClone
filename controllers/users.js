@@ -1,0 +1,223 @@
+const User = require('../models/user');
+const Campground = require('../models/campgrounds');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../utils/email');
+const { getProblemStage } = require('../utils/stageHelper');
+const Idea = require('../models/schemas').Idea;
+
+module.exports.renderRegister = (req, res) => {
+    res.render('users/register');
+}
+
+module.exports.renderDashboard = async (req, res) => {
+    try {
+        console.log('Rendering dashboard for user:', req.user._id);
+        const campgrounds = await Campground.find({ author: req.user._id })
+            .populate('author')
+            .populate('reviews')
+            .populate('teamInfo.enrolledProgram')
+            .populate('problemStatementInfo.selectedPredefinedProblem')
+            .populate('solution')
+            .populate('prototype')
+            .lean() // Use lean to get plain objects with all fields
+            .sort({ createdAt: -1 }); // Show newest first
+        
+        // Add stage information and idea counts to each campground
+        const campgroundsWithStage = await Promise.all(campgrounds.map(async (campground) => {
+            // Count ideas for ideation progress
+            let ideaCount = 0;
+            try {
+                ideaCount = await Idea.countDocuments({ problemId: campground._id });
+            } catch (err) {
+                ideaCount = 0;
+            }
+            
+            // Get stage info with ideaCount
+            // Ensure prototype is properly populated with files
+            let campForStage = campground;
+            if (campground.prototype) {
+              if (typeof campground.prototype === 'object' && campground.prototype._id) {
+                // Prototype is populated, check if it has files
+                // With .lean(), files should be accessible directly
+                if (!campground.prototype.files || !Array.isArray(campground.prototype.files) || campground.prototype.files.length === 0) {
+                  // Files not populated or empty, fetch prototype separately
+                  const { Prototype } = require('../models/schemas');
+                  const proto = await Prototype.findById(campground.prototype._id);
+                  if (proto) {
+                    campForStage = { ...campground };
+                    campForStage.prototype = proto.toObject ? proto.toObject() : proto;
+                  }
+                }
+              } else {
+                // Prototype is just an ID, we need to fetch it
+                const { Prototype } = require('../models/schemas');
+                const proto = await Prototype.findById(campground.prototype);
+                if (proto) {
+                  campForStage = { ...campground };
+                  campForStage.prototype = proto.toObject ? proto.toObject() : proto;
+                }
+              }
+            }
+            const stageInfo = getProblemStage(campForStage, ideaCount);
+            const campObj = { ...campground }; // Create a copy to avoid mutating the original
+            campObj.currentStage = stageInfo.name;
+            campObj.stageNumber = stageInfo.stage;
+            campObj.progress = stageInfo.progress;
+            campObj.ideaCount = ideaCount;
+            campObj.stageProgress = stageInfo.stageProgress;
+            
+            return campObj;
+        }));
+        
+        console.log('Found campgrounds:', campgroundsWithStage.length);
+        res.render('users/dashboard', { campgrounds: campgroundsWithStage, currentUser: req.user });
+    } catch (error) {
+        console.error('Error rendering dashboard:', error);
+        req.flash('error', 'Error loading dashboard');
+        res.redirect('/campgrounds');
+    }
+}
+
+module.exports.register = async(req, res) => {
+    try{
+        const {email, username, password} = req.body;
+        const user = new User ({email, username});
+        const registeredUser = await User.register(user, password);
+        req.login(registeredUser, err => {
+            if(err) return next(err);
+            req.flash('success','Welcome to Problem Discovery Platform');
+            res.redirect('/');
+        })
+    }catch(e){
+        req.flash('error', e.message);
+        res.redirect('register');
+    }
+}
+
+module.exports.renderLogin = (req, res) =>{
+    res.render('users/login');
+}
+
+module.exports.login = (req, res) => {
+    req.flash('success', 'Welcome back!');
+    // Always redirect to home page after login
+    delete req.session.returnTo;
+    res.redirect('/');
+}
+
+module.exports.logout = (req, res, next) => {
+    req.logout(function (err) {
+        if (err) {
+            return next(err);
+        }
+        req.flash('success', 'Goodbye!');
+        res.redirect('/');
+    });
+}
+
+// Google OAuth callback
+module.exports.googleCallback = (req, res) => {
+    req.flash('success', 'Welcome! You have successfully logged in with Google.');
+    // Always redirect to home page after login
+    delete req.session.returnTo;
+    res.redirect('/');
+}
+
+// Forgot password - render form
+module.exports.renderForgotPassword = (req, res) => {
+    res.render('users/forgot-password');
+}
+
+// Forgot password - send reset email
+module.exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        
+        if (!user) {
+            req.flash('error', 'No account with that email address exists.');
+            return res.redirect('/forgot-password');
+        }
+        
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        await user.save();
+        
+        // Send email (build base URL from the current request to avoid BASE_URL issues)
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const result = await sendPasswordResetEmail(user.email, resetToken, baseUrl);
+        
+        if (result && result.success) {
+            let message = 'Password reset email sent! Check your inbox.';
+            if (result.previewUrl) {
+                message += ` Preview: ${result.previewUrl}`;
+                console.log('Password reset email preview URL:', result.previewUrl);
+            }
+            req.flash('success', message);
+        } else {
+            // As a dev convenience, show the direct link if email couldn't be sent
+            const fallbackUrl = `${baseUrl}/reset-password/${resetToken}`;
+            console.error('Password reset email error:', result && result.error);
+            req.flash('error', `Email could not be sent. Use this link to reset now: ${fallbackUrl}`);
+        }
+        
+        res.redirect('/forgot-password');
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/forgot-password');
+    }
+}
+
+// Reset password - render form
+module.exports.renderResetPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: req.params.token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+        
+        if (!user) {
+            req.flash('error', 'Password reset token is invalid or has expired.');
+            return res.redirect('/forgot-password');
+        }
+        
+        res.render('users/reset-password', { token: req.params.token });
+    } catch (error) {
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/forgot-password');
+    }
+}
+
+// Reset password - update password
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: req.params.token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+        
+        if (!user) {
+            req.flash('error', 'Password reset token is invalid or has expired.');
+            return res.redirect('/forgot-password');
+        }
+        
+        if (req.body.password !== req.body.confirmPassword) {
+            req.flash('error', 'Passwords do not match.');
+            return res.redirect(`/reset-password/${req.params.token}`);
+        }
+        
+        await user.setPassword(req.body.password);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+        
+        req.flash('success', 'Password has been reset successfully!');
+        res.redirect('/login');
+    } catch (error) {
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/forgot-password');
+    }
+}
