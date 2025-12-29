@@ -269,7 +269,8 @@ app.get("/", async (req, res) => {
 
 // Favicon route - serve logo as favicon
 app.get("/favicon.ico", (req, res) => {
-  res.redirect("/images/logo-tranparent.png");
+  res.type("image/png");
+  res.sendFile(path.join(__dirname, "public/images/logo-tranparent.png"));
 });
 
 // Robots.txt route
